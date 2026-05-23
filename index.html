@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>puna.moon</title>
+  <meta name="description" content="山の稜線、凪の海、心象風景。自然の景色を身につけて。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@200;300&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0e0e0c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Jost', sans-serif;
+    }
+
+    .hero {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+    }
+
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+      filter: brightness(0.92);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 40%,
+        rgba(14,14,12,0.6) 75%,
+        rgba(14,14,12,1) 100%
+      );
+    }
+
+    .content {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 2rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      margin-top: -3rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand { text-align: center; }
+
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 2.4rem;
+      color: #f0ede8;
+      letter-spacing: 0.15em;
+      line-height: 1;
+    }
+
+    .brand-dot { color: #a8a090; }
+
+    .brand-sub {
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      color: #6a6860;
+      font-weight: 200;
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      width: 32px;
+      height: 0.5px;
+      background: #3a3830;
+    }
+
+    .links {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.4rem;
+      border: 0.5px solid #2e2d2a;
+      text-decoration: none;
+      color: #c8c4bc;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      font-weight: 300;
+      text-transform: uppercase;
+      transition: all 0.25s ease;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .link-btn:hover {
+      border-color: #5a5850;
+      color: #f0ede8;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .link-arrow {
+      font-size: 12px;
+      color: #3a3830;
+      transition: all 0.25s ease;
+    }
+
+    .link-btn:hover .link-arrow {
+      color: #a8a090;
+      transform: translateX(3px);
+    }
+
+    .footer {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      color: #2e2d2a;
+      text-transform: uppercase;
+      font-weight: 200;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+    }
+    .fade-in:nth-child(1) { animation-delay: 0.1s; }
+    .fade-in:nth-child(2) { animation-delay: 0.25s; }
+    .fade-in:nth-child(3) { animation-delay: 0.4s; }
+    .fade-in:nth-child(4) { animation-delay: 0.55s; }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <img src="kasane_main_01.JPG" alt="puna.moon — 山の稜線リング">
+    <div class="hero-overlay"></div>
+  </div>
+
+  <div class="content">
+    <div class="brand fade-in">
+      <div class="brand-name">puna<span class="brand-dot">.</span>moon</div>
+      <div class="brand-sub">handcrafted jewelry</div>
+    </div>
+
+    <div class="divider fade-in"></div>
+
+    <div class="links fade-in">
+      <a class="link-btn" href="https://www.instagram.com/puna.moon/" target="_blank">
+        <span>Instagram</span>
+        <span class="link-arrow">→</span>
+      </a>
+      <a class="link-btn" href="https://punamoon.base.shop" target="_blank">
+        <span>Online Shop</span>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+    <div class="footer fade-in">© puna.moon</div>
+  </div>
+
+</body>
+</html>
