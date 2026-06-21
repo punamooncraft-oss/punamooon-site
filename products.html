@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Works — puna.moon</title>
+  <meta name="description" content="puna.moon の作品一覧。山の稜線をモチーフにしたリング、ピアス、イヤカフ。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@200;300&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0e0e0c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Jost', sans-serif;
+      color: #c8c4bc;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      width: 100%;
+      max-width: 480px;
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 0.5px solid #2e2d2a;
+    }
+    .nav-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.1rem;
+      color: #f0ede8;
+      text-decoration: none;
+      letter-spacing: 0.12em;
+    }
+    .nav-brand .dot { color: #a8a090; }
+    .nav-links { display: flex; gap: 1.4rem; }
+    .nav-links a {
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #6a6860;
+      text-decoration: none;
+      font-weight: 200;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: #c8c4bc; }
+
+    /* ── MAIN ── */
+    .main {
+      width: 100%;
+      max-width: 480px;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    .page-heading {
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+      animation-delay: 0.05s;
+    }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.5rem;
+      color: #f0ede8;
+      letter-spacing: 0.2em;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .page-title-sub {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      color: #6a6860;
+      font-weight: 200;
+      text-transform: uppercase;
+    }
+
+    /* ── PRODUCT LIST ── */
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3.5rem;
+    }
+
+    .product-item {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+    }
+    .product-item:nth-child(1) { animation-delay: 0.15s; }
+    .product-item:nth-child(2) { animation-delay: 0.25s; }
+    .product-item:nth-child(3) { animation-delay: 0.35s; }
+    .product-item:nth-child(4) { animation-delay: 0.45s; }
+    .product-item:nth-child(5) { animation-delay: 0.55s; }
+
+    /* 画像コンテナ — src="" のとき暗色プレースホルダーを表示 */
+    .product-img-wrap {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #141412;
+      overflow: hidden;
+    }
+    .product-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.92);
+    }
+    .product-img[src=""] { opacity: 0; }
+
+    .product-info {
+      padding: 1rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .product-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.25rem;
+      color: #f0ede8;
+      letter-spacing: 0.1em;
+      line-height: 1.2;
+    }
+    .product-name-en {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      color: #6a6860;
+      font-weight: 200;
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+
+    /* バッジ */
+    .badge {
+      font-size: 8px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 300;
+      padding: 3px 8px;
+      border: 0.5px solid;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .badge-open  { color: #a8a090; border-color: #a8a090; }
+    .badge-closed { color: #3a3830; border-color: #2e2d2a; }
+    .badge-soon  { color: #6a6860; border-color: #3a3830; }
+
+    .product-img-link {
+      display: block;
+      text-decoration: none;
+    }
+    .product-img-link .product-img-wrap {
+      transition: opacity 0.25s ease;
+    }
+    .product-img-link:hover .product-img-wrap {
+      opacity: 0.8;
+    }
+
+    .product-material {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: #6a6860;
+      font-weight: 200;
+    }
+
+    .product-divider {
+      width: 100%;
+      height: 0.5px;
+      background: #2e2d2a;
+      margin-top: 0.6rem;
+    }
+
+    .product-actions { padding-top: 0.8rem; }
+
+    .shop-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.2rem;
+      border: 0.5px solid #2e2d2a;
+      text-decoration: none;
+      color: #c8c4bc;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      font-weight: 200;
+      text-transform: uppercase;
+      transition: all 0.25s ease;
+      background: rgba(255,255,255,0.02);
+    }
+    .shop-btn:hover {
+      border-color: #5a5850;
+      color: #f0ede8;
+      background: rgba(255,255,255,0.04);
+    }
+    .shop-btn .arrow {
+      color: #3a3830;
+      transition: all 0.25s ease;
+    }
+    .shop-btn:hover .arrow {
+      color: #a8a090;
+      transform: translateX(3px);
+    }
+
+    .catalog-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.2rem;
+      border: 0.5px solid #2e2d2a;
+      text-decoration: none;
+      color: #a8a090;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      font-weight: 300;
+      text-transform: uppercase;
+      transition: all 0.25s ease;
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 2.5rem;
+    }
+    .catalog-link:hover {
+      border-color: #5a5850;
+      color: #f0ede8;
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem;
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      color: #2e2d2a;
+      text-transform: uppercase;
+      font-weight: 200;
+      border-top: 0.5px solid #2e2d2a;
+      margin-top: auto;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="./index.html" class="nav-brand">puna<span class="dot">.</span>moon</a>
+    <div class="nav-links">
+      <a href="./index.html">Index</a>
+      <a href="./products.html" class="active">Works</a>
+      <a href="./about.html">About</a>
+      <a href="./order.html">Order</a>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <div class="page-heading">
+      <div class="page-title">Works</div>
+      <div class="page-title-sub">handcrafted jewelry</div>
+    </div>
+
+    <a class="catalog-link" href="./catalog.html">
+      <span>展示会用カタログ全体を見る &nbsp;/ &nbsp;Full Catalog</span>
+      <span>→</span>
+    </a>
+
+    <div class="product-list">
+
+      <!-- ★ 2999 剱岳等高線リング（詳細ページあり） -->
+      <div class="product-item">
+        <a href="./2999.html" class="product-img-link">
+          <div class="product-img-wrap">
+            <!-- 写真ファイル名を src= に記入 -->
+            <img class="product-img" src="" alt="2999 剱岳等高線リング">
+          </div>
+        </a>
+        <div class="product-info">
+          <div class="product-header">
+            <div>
+              <div class="product-name">2999</div>
+              <div class="product-name-en">Mt. Tsurugi Contour Ring</div>
+            </div>
+            <span class="badge badge-soon">Coming Soon</span>
+          </div>
+          <div class="product-material">真鍮 / Brass &nbsp;·&nbsp; Silver</div>
+          <div class="product-divider"></div>
+          <div class="product-actions">
+            <a class="shop-btn" href="./2999.html">
+              <span>詳細を見る &nbsp;/ &nbsp;Detail</span>
+              <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ① kasane リング -->
+      <div class="product-item">
+        <div class="product-img-wrap">
+          <!-- 写真ファイル名を src= に記入 -->
+          <img class="product-img" src="" alt="kasane リング">
+        </div>
+        <div class="product-info">
+          <div class="product-header">
+            <div>
+              <div class="product-name">kasane リング</div>
+              <div class="product-name-en">Kasane Ring</div>
+            </div>
+            <!-- 受注中: badge-open / 受注外: badge-closed に変更 -->
+            <span class="badge badge-open">受注中</span>
+          </div>
+          <div class="product-material">真鍮 / Brass &nbsp;·&nbsp; Silver</div>
+          <div class="product-divider"></div>
+          <div class="product-actions">
+            <a class="shop-btn" href="https://punamoon.base.shop" target="_blank">
+              <span>Shop</span>
+              <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② 槍穂 リング -->
+      <div class="product-item">
+        <div class="product-img-wrap">
+          <img class="product-img" src="" alt="槍穂 リング">
+        </div>
+        <div class="product-info">
+          <div class="product-header">
+            <div>
+              <div class="product-name">槍穂 リング</div>
+              <div class="product-name-en">Yariho Ring</div>
+            </div>
+            <span class="badge badge-closed">—</span>
+          </div>
+          <div class="product-material">真鍮 / Brass</div>
+          <div class="product-divider"></div>
+          <div class="product-actions">
+            <a class="shop-btn" href="https://punamoon.base.shop" target="_blank">
+              <span>Shop</span>
+              <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ 稜線ピアス -->
+      <div class="product-item">
+        <div class="product-img-wrap">
+          <img class="product-img" src="" alt="稜線ピアス">
+        </div>
+        <div class="product-info">
+          <div class="product-header">
+            <div>
+              <div class="product-name">稜線ピアス</div>
+              <div class="product-name-en">Ridgeline Pierce</div>
+            </div>
+            <span class="badge badge-closed">—</span>
+          </div>
+          <div class="product-material">真鍮 / Brass &nbsp;·&nbsp; Silver</div>
+          <div class="product-divider"></div>
+          <div class="product-actions">
+            <a class="shop-btn" href="https://punamoon.base.shop" target="_blank">
+              <span>Shop</span>
+              <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ 稜線イヤカフ -->
+      <div class="product-item">
+        <div class="product-img-wrap">
+          <img class="product-img" src="" alt="稜線イヤカフ">
+        </div>
+        <div class="product-info">
+          <div class="product-header">
+            <div>
+              <div class="product-name">稜線イヤカフ</div>
+              <div class="product-name-en">Ridgeline Earcuff</div>
+            </div>
+            <span class="badge badge-closed">—</span>
+          </div>
+          <div class="product-material">真鍮 / Brass</div>
+          <div class="product-divider"></div>
+          <div class="product-actions">
+            <a class="shop-btn" href="https://punamoon.base.shop" target="_blank">
+              <span>Shop</span>
+              <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">© puna.moon</footer>
+
+</body>
+</html>

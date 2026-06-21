@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order — puna.moon</title>
+  <meta name="description" content="puna.moon 受注情報。次回受注期間・受注方法のご案内。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@200;300&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0e0e0c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Jost', sans-serif;
+      color: #c8c4bc;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      width: 100%;
+      max-width: 480px;
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 0.5px solid #2e2d2a;
+    }
+    .nav-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.1rem;
+      color: #f0ede8;
+      text-decoration: none;
+      letter-spacing: 0.12em;
+    }
+    .nav-brand .dot { color: #a8a090; }
+    .nav-links { display: flex; gap: 1.4rem; }
+    .nav-links a {
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #6a6860;
+      text-decoration: none;
+      font-weight: 200;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: #c8c4bc; }
+
+    /* ── MAIN ── */
+    .main {
+      width: 100%;
+      max-width: 480px;
+      padding: 2.5rem 2rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    /* ── PAGE HEADING ── */
+    .page-heading {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+      animation-delay: 0.05s;
+    }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.5rem;
+      color: #f0ede8;
+      letter-spacing: 0.2em;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .page-title-sub {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      color: #6a6860;
+      font-weight: 200;
+      text-transform: uppercase;
+    }
+
+    /* ── STATUS CARD ── */
+    .status-card {
+      border: 0.5px solid #2e2d2a;
+      padding: 1.5rem 1.4rem;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+      animation-delay: 0.15s;
+    }
+    .status-label {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      font-weight: 200;
+      margin-bottom: 0.8rem;
+    }
+
+    /* 受注中のとき */
+    body[data-order="open"] .status-open   { display: block; }
+    body[data-order="open"] .status-closed { display: none; }
+    /* 受注期間外のとき */
+    body[data-order="closed"] .status-open   { display: none; }
+    body[data-order="closed"] .status-closed { display: block; }
+
+    .status-open .status-label   { color: #a8a090; }
+    .status-closed .status-label { color: #6a6860; }
+
+    .status-open {
+      border-left: 1.5px solid #a8a090;
+      padding-left: 1rem;
+    }
+    .status-closed {
+      border-left: 1.5px solid #2e2d2a;
+      padding-left: 1rem;
+    }
+
+    .status-main {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.3rem;
+      color: #f0ede8;
+      letter-spacing: 0.1em;
+      line-height: 1.4;
+    }
+    .status-sub {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: #6a6860;
+      font-weight: 200;
+      margin-top: 0.4rem;
+    }
+
+    /* 次回受注日 */
+    .next-date {
+      margin-top: 1rem;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: #c8c4bc;
+      font-weight: 200;
+    }
+    .next-date span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      color: #f0ede8;
+      letter-spacing: 0.1em;
+      margin-left: 0.5rem;
+    }
+
+    /* ── SCHEDULE ── */
+    .schedule-section {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+      animation-delay: 0.25s;
+    }
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      color: #6a6860;
+      font-weight: 200;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      position: relative;
+    }
+    .timeline-item + .timeline-item { margin-top: 0; }
+
+    .timeline-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 20px;
+      flex-shrink: 0;
+    }
+    .timeline-dot {
+      width: 5px;
+      height: 5px;
+      border: 0.5px solid #3a3830;
+      border-radius: 50%;
+      background: #0e0e0c;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .timeline-line {
+      width: 0.5px;
+      flex: 1;
+      background: #2e2d2a;
+      margin: 4px 0;
+      min-height: 24px;
+    }
+    .timeline-item:last-child .timeline-line { display: none; }
+
+    .timeline-content {
+      padding-bottom: 1.5rem;
+    }
+    .timeline-step {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #6a6860;
+      font-weight: 200;
+      margin-bottom: 0.3rem;
+    }
+    .timeline-text {
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      color: #c8c4bc;
+      font-weight: 200;
+      line-height: 1.7;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 32px;
+      height: 0.5px;
+      background: #3a3830;
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards;
+      animation-delay: 0.3s;
+    }
+
+    /* ── NOTE ── */
+    .note-section {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+      animation-delay: 0.35s;
+    }
+    .note-text {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: #6a6860;
+      font-weight: 200;
+      line-height: 2;
+    }
+
+    /* ── SHOP BUTTON ── */
+    .shop-section {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+      animation-delay: 0.45s;
+    }
+
+    /* 受注中のときのみ表示 */
+    body[data-order="open"]   .shop-section { display: block; }
+    body[data-order="closed"] .shop-section { display: none; }
+
+    .link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.4rem;
+      border: 0.5px solid #2e2d2a;
+      text-decoration: none;
+      color: #c8c4bc;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      font-weight: 300;
+      text-transform: uppercase;
+      transition: all 0.25s ease;
+      background: rgba(255,255,255,0.02);
+    }
+    .link-btn:hover {
+      border-color: #5a5850;
+      color: #f0ede8;
+      background: rgba(255,255,255,0.05);
+    }
+    .link-arrow {
+      font-size: 12px;
+      color: #3a3830;
+      transition: all 0.25s ease;
+    }
+    .link-btn:hover .link-arrow {
+      color: #a8a090;
+      transform: translateX(3px);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem;
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      color: #2e2d2a;
+      text-transform: uppercase;
+      font-weight: 200;
+      border-top: 0.5px solid #2e2d2a;
+      margin-top: auto;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<!-- ↓ 受注状態の切り替え: data-order="open" = 受注中 / data-order="closed" = 受注期間外 -->
+<body data-order="closed">
+
+  <nav class="nav">
+    <a href="./index.html" class="nav-brand">puna<span class="dot">.</span>moon</a>
+    <div class="nav-links">
+      <a href="./index.html">Index</a>
+      <a href="./products.html">Works</a>
+      <a href="./about.html">About</a>
+      <a href="./order.html" class="active">Order</a>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <div class="page-heading">
+      <div class="page-title">Order</div>
+      <div class="page-title-sub">made to order</div>
+    </div>
+
+    <!-- 受注ステータス -->
+    <div class="status-card">
+
+      <!-- 受注中のとき -->
+      <div class="status-open">
+        <div class="status-label">現在の状態 / Status</div>
+        <div class="status-main">受注受付中</div>
+        <div class="status-sub">Currently accepting orders</div>
+        <!-- ↓ 受注期間の終了日を記入 -->
+        <div class="next-date">受付終了 <span>2025年○月○日</span></div>
+      </div>
+
+      <!-- 受注期間外のとき -->
+      <div class="status-closed">
+        <div class="status-label">現在の状態 / Status</div>
+        <div class="status-main">受注期間外</div>
+        <div class="status-sub">Orders currently closed</div>
+        <!-- ↓ 次回受注開始予定日を記入。未定の場合は「近日公開」など -->
+        <div class="next-date">次回受注 <span>近日公開</span></div>
+      </div>
+
+    </div>
+
+    <!-- スケジュール -->
+    <div class="schedule-section">
+      <div class="section-label">Flow</div>
+      <div class="timeline">
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-step">Step 01 &nbsp;受注期間</div>
+            <div class="timeline-text">
+              ショップにてご注文受付<br>
+              <!-- ↓ 受注期間の目安を記入 -->
+              受注期間：約○週間
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-step">Step 02 &nbsp;制作期間</div>
+            <div class="timeline-text">
+              受注確定後、一点ずつ手作業で制作<br>
+              <!-- ↓ 制作期間の目安を記入 -->
+              制作期間：約○〜○ヶ月
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-step">Step 03 &nbsp;発送</div>
+            <div class="timeline-text">
+              制作完了後、順次発送<br>
+              発送のご連絡をお送りします
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 注意事項 -->
+    <div class="note-section">
+      <div class="section-label">Note</div>
+      <div class="note-text">
+        <!-- ↓ 注意事項・その他情報を記入 -->
+        ・受注品のため、キャンセル・返品はお受けできません。<br>
+        ・サイズ・素材についてはショップ内の商品説明をご確認ください。<br>
+        ・受注状況はInstagramでもお知らせします。
+      </div>
+    </div>
+
+    <!-- 受注中のみ表示されるショップボタン -->
+    <div class="shop-section">
+      <a class="link-btn" href="https://punamoon.base.shop" target="_blank">
+        <span>受注はこちら &nbsp;/ &nbsp;Order Here</span>
+        <span class="link-arrow">→</span>
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="footer">© puna.moon</footer>
+
+</body>
+</html>

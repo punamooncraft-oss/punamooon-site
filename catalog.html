@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalog — puna.moon</title>
+  <meta name="description" content="puna.moon 製品カタログ。稜線リング、2999、イヤカフ・ピアス、フルオーダーのご案内。展示会でのご説明にもご利用いただけます。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0e0e0c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Jost', sans-serif;
+      color: #c8c4bc;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      width: 100%;
+      max-width: 480px;
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 0.5px solid #2e2d2a;
+    }
+    .nav-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.1rem;
+      color: #f0ede8;
+      text-decoration: none;
+      letter-spacing: 0.12em;
+    }
+    .nav-brand .dot { color: #a8a090; }
+    .nav-links { display: flex; gap: 1.4rem; }
+    .nav-links a {
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #6a6860;
+      text-decoration: none;
+      font-weight: 200;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: #c8c4bc; }
+
+    /* ── JUMP NAV ── */
+    .jump-nav {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.9rem 1.4rem;
+      overflow-x: auto;
+      border-bottom: 0.5px solid #2e2d2a;
+      position: sticky;
+      top: 0;
+      background: #0e0e0c;
+      z-index: 10;
+      scrollbar-width: none;
+    }
+    .jump-nav::-webkit-scrollbar { display: none; }
+    .jump-nav a {
+      flex-shrink: 0;
+      padding: 0.45rem 0.9rem;
+      border: 0.5px solid #2e2d2a;
+      border-radius: 20px;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #8a8680;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .jump-nav a:hover { border-color: #5a5850; color: #f0ede8; }
+
+    /* ── HERO ── */
+    .hero {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+    }
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.85);
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 45%, rgba(14,14,12,0.75) 80%, rgba(14,14,12,1) 100%);
+    }
+    .hero-text {
+      position: absolute;
+      bottom: 1.8rem;
+      left: 2rem;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 2rem;
+      color: #f0ede8;
+      letter-spacing: 0.15em;
+    }
+    .hero-sub {
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      color: #a8a090;
+      text-transform: uppercase;
+      margin-top: 0.4rem;
+    }
+
+    /* ── MAIN ── */
+    .main { width: 100%; max-width: 480px; }
+
+    .section {
+      padding: 3rem 2rem 2.5rem;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards;
+    }
+    .section-alt { background: #111110; }
+
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      color: #6a6860;
+      font-weight: 200;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.5rem;
+      color: #f0ede8;
+      letter-spacing: 0.15em;
+      margin-bottom: 1.6rem;
+    }
+
+    .body-text {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: #c8c4bc;
+      font-weight: 200;
+      line-height: 2.1;
+    }
+    .body-text + .body-text { margin-top: 1.2rem; }
+
+    /* ── CONCEPT ── */
+    .concept-photo {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      margin-top: 1.8rem;
+    }
+    .concept-photo img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      filter: brightness(0.9);
+    }
+    .profile-box {
+      margin-top: 1.8rem;
+      padding-top: 1.6rem;
+      border-top: 0.5px solid #2e2d2a;
+    }
+    .profile-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.05rem;
+      color: #a8a090;
+      margin-bottom: 0.6rem;
+    }
+
+    /* ── DIVIDER ── */
+    .divider-full { width: 100%; height: 0.5px; background: #2e2d2a; }
+
+    /* ── PRODUCT BLOCK ── */
+    .product {
+      margin-bottom: 3rem;
+    }
+    .product:last-child { margin-bottom: 0; }
+    .product-photo {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #0f0f0d;
+      overflow: hidden;
+    }
+    .product-photo img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      filter: brightness(0.92);
+    }
+    .product-photo-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+    }
+    .product-photo-row .product-photo { aspect-ratio: 3 / 4; }
+
+    .product-body { padding-top: 1.1rem; }
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.2rem;
+      color: #f0ede8;
+      letter-spacing: 0.08em;
+    }
+    .product-tag {
+      display: inline-block;
+      font-size: 8px;
+      letter-spacing: 0.2em;
+      color: #6a6860;
+      border: 0.5px solid #2e2d2a;
+      padding: 2px 7px;
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+    }
+    .product-desc {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: #9a968e;
+      font-weight: 200;
+      line-height: 1.9;
+      margin-top: 0.7rem;
+    }
+
+    .price-table {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.55rem 0;
+      border-bottom: 0.5px solid #2e2d2a;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+    }
+    .price-row:first-child { border-top: 0.5px solid #2e2d2a; }
+    .price-material { color: #8a8680; }
+    .price-value {
+      font-family: 'Cormorant Garamond', serif;
+      color: #f0ede8;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+    }
+
+    /* note box (kasaneについて 等) */
+    .note-box {
+      margin-top: 2.5rem;
+      padding: 1.4rem 1.4rem;
+      border: 0.5px solid #2e2d2a;
+      background: rgba(255,255,255,0.015);
+    }
+    .note-box .section-label { margin-bottom: 0.8rem; }
+    .note-box .body-text { font-size: 11px; color: #9a968e; line-height: 1.9; }
+
+    /* detail link */
+    .detail-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1.4rem;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #a8a090;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .detail-link:hover { color: #f0ede8; }
+
+    /* ── FULLORDER PRICE TIERS ── */
+    .tier-list { margin-top: 1.4rem; }
+    .tier-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.7rem 0;
+      border-bottom: 0.5px solid #2e2d2a;
+    }
+    .tier-row:first-child { border-top: 0.5px solid #2e2d2a; }
+    .tier-name { font-size: 11px; letter-spacing: 0.2em; color: #c8c4bc; }
+    .tier-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      color: #f0ede8;
+      letter-spacing: 0.05em;
+    }
+    .tier-note {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: #6a6860;
+      margin-top: 0.8rem;
+      line-height: 1.8;
+    }
+
+    /* ── PRICE LIST TABLE ── */
+    .pricelist-group { margin-top: 0.5rem; }
+    .pricelist-group + .pricelist-group { margin-top: 2rem; }
+    .pricelist-group-title {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #a8a090;
+      margin-bottom: 0.6rem;
+    }
+
+    /* ── LEAD TIME ── */
+    .leadtime-item { margin-bottom: 1.4rem; }
+    .leadtime-item:last-child { margin-bottom: 0; }
+    .leadtime-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: #a8a090;
+      margin-bottom: 0.4rem;
+    }
+    .leadtime-text {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: #9a968e;
+      line-height: 1.9;
+    }
+
+    /* ── CONTACT ── */
+    .contact-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.4rem;
+      border: 0.5px solid #2e2d2a;
+      text-decoration: none;
+      color: #c8c4bc;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      font-weight: 300;
+      text-transform: uppercase;
+      transition: all 0.25s ease;
+      background: rgba(255,255,255,0.02);
+    }
+    .link-btn:hover {
+      border-color: #5a5850;
+      color: #f0ede8;
+      background: rgba(255,255,255,0.05);
+    }
+    .link-arrow { font-size: 12px; color: #3a3830; transition: all 0.25s ease; }
+    .link-btn:hover .link-arrow { color: #a8a090; transform: translateX(3px); }
+
+    /* ── FOOTER ── */
+    .footer {
+      width: 100%;
+      max-width: 480px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      color: #2e2d2a;
+      text-transform: uppercase;
+      font-weight: 200;
+      border-top: 0.5px solid #2e2d2a;
+    }
+
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="./index.html" class="nav-brand">puna<span class="dot">.</span>moon</a>
+    <div class="nav-links">
+      <a href="./index.html">Index</a>
+      <a href="./products.html">Works</a>
+      <a href="./about.html">About</a>
+      <a href="./order.html">Order</a>
+    </div>
+  </nav>
+
+  <div class="jump-nav">
+    <a href="#concept">Concept</a>
+    <a href="#ring">Ring</a>
+    <a href="#2999">2999</a>
+    <a href="#ear">Ear Cuffs / Pierce</a>
+    <a href="#tenugui">手ぬぐいどめ</a>
+    <a href="#fullorder">Fullorder</a>
+    <a href="#price">Price List</a>
+    <a href="#contact">Contact</a>
+  </div>
+
+  <div class="hero">
+    <img src="./img/catalog/hero_hand_ring.jpg" alt="puna.moon 稜線リング">
+    <div class="hero-overlay"></div>
+    <div class="hero-text">
+      <div class="hero-title">Catalog</div>
+      <div class="hero-sub">mountain ridge jewelry</div>
+    </div>
+  </div>
+
+  <main class="main">
+
+    <!-- ===== CONCEPT ===== -->
+    <section class="section" id="concept">
+      <div class="section-label">Concept</div>
+      <div class="body-text">
+        時に厳しく、時に力強い自然の造形をジュエリーに。puna.moonは、自ら歩いた山の稜線を手作業で地金に刻み込むブランドです。自然から得た着想を形にし、都市の暮らしの中でも自然と共にある実感をもたらします。雄大な景色を纏い、日々を心穏やかに、そして豊かに暮らすためのアイテムです。
+      </div>
+      <div class="body-text">
+        使うほどに刻まれていく細かな傷や風合いの変化は、長年使い込んだ山道具と同じく、あなただけの特別なものになっていきます。
+      </div>
+
+      <div class="concept-photo">
+        <img src="./img/catalog/concept_ridge.jpg" alt="稜線の風景" loading="lazy">
+      </div>
+
+      <div class="profile-box">
+        <div class="section-label">Profile / Director</div>
+        <div class="profile-name">Yoshihiro Nakamura</div>
+        <div class="body-text" style="font-size: 11px; color: #9a968e;">
+          登山歴12年。趣味として作り始めた指輪作りに山の友人が共感してくれたことがブランドの原点。友人の描いたデザインを形にしたことから現在の稜線リングの製作が始まりました。自ら歩いた記憶と体験を大切にしながら、一点ずつ地金を切り出し、山の稜線をジュエリーにしています。
+        </div>
+      </div>
+    </section>
+
+    <div class="divider-full"></div>
+
+    <!-- ===== ORIGINAL RING (稜線リング) ===== -->
+    <section class="section" id="ring">
+      <div class="section-label">Original</div>
+      <div class="section-title">稜線リング</div>
+
+      <!-- 稜線リング槍穂 -->
+      <div class="product">
+        <div class="product-photo">
+          <img src="./img/catalog/yariho_brass.jpg" alt="稜線リング槍穂" loading="lazy">
+        </div>
+        <div class="product-body">
+          <div class="product-name">稜線リング 槍穂</div>
+          <span class="product-tag">受注生産品</span>
+          <div class="product-desc">
+            槌目、梨地、鏡面など様々な加工に対応。最もベーシックなモデル。<br>
+            槍穂シリーズ ― 北アルプス蝶ヶ岳より望む、槍ヶ岳から穂高岳のシルエット。
+          </div>
+          <div class="price-table">
+            <div class="price-row"><span class="price-material">Brass</span><span class="price-value">¥7,700</span></div>
+            <div class="price-row"><span class="price-material">Sv925</span><span class="price-value">¥11,000</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- kasane 槍穂 -->
+      <div class="product">
+        <div class="product-photo">
+          <img src="./img/catalog/kasane_yariho_silver.jpg" alt="kasane 槍穂" loading="lazy">
+        </div>
+        <div class="product-body">
+          <div class="product-name">kasane 槍穂</div>
+          <span class="product-tag">受注生産品</span>
+          <div class="product-desc">
+            定番の稜線の上部にもうひとつの稜線を重ねたリング。幅広の地金を贅沢に使い、山のシルエットを際立たせたフラットなデザイン。
+          </div>
+          <div class="price-table">
+            <div class="price-row"><span class="price-material">Brass</span><span class="price-value">¥11,000</span></div>
+            <div class="price-row"><span class="price-material">Sv925</span><span class="price-value">¥14,300</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- kasaneについて -->
+      <div class="note-box">
+        <div class="section-label">kasane について</div>
+        <div class="body-text">
+          kasaneは2つで1セットのリングです。職人が地金から1本ずつ手作業で切り出しているため、サイズが同じでも、ぴったり重なり合うのは世界でこの1セットのみです。
+        </div>
+      </div>
+
+      <div class="divider-full" style="margin: 2.5rem 0;"></div>
+
+      <!-- kasane 八ヶ岳 -->
+      <div class="product">
+        <div class="product-photo">
+          <img src="./img/catalog/kasane_yatsugatake_silver.jpg" alt="kasane 八ヶ岳" loading="lazy">
+        </div>
+        <div class="product-body">
+          <div class="product-name">kasane 八ヶ岳</div>
+          <span class="product-tag">受注生産品</span>
+          <div class="product-desc">
+            稜線リング、八ヶ岳のkasaneモデル。スタンダードモデルよりも細身の稜線にピッタリ重なるよう作成した2本セットのリング。
+          </div>
+          <div class="price-table">
+            <div class="price-row"><span class="price-material">Sv925</span><span class="price-value">¥14,300</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- kasane 尾瀬 -->
+      <div class="product">
+        <div class="product-photo">
+          <img src="./img/catalog/kasane_oze_brass.jpg" alt="kasane 尾瀬" loading="lazy">
+        </div>
+        <div class="product-body">
+          <div class="product-name">kasane 尾瀬</div>
+          <span class="product-tag">受注生産品</span>
+          <div class="product-desc">
+            至仏山、燧ヶ岳が上下前後対になったリング。朝靄をイメージしたSV925製のマット仕上げリングと、秋の草紅葉をイメージした真鍮製の2種類。
+          </div>
+          <div class="price-table">
+            <div class="price-row"><span class="price-material">Brass</span><span class="price-value">¥11,000</span></div>
+            <div class="price-row"><span class="price-material">Sv925</span><span class="price-value">¥14,300</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 丹沢 -->
+      <div class="product">
+        <div class="product-photo">
+          <img src="./img/catalog/tanzawa_silver.jpg" alt="丹沢" loading="lazy">
+        </div>
+        <div class="product-body">
+          <div class="product-name">丹沢</div>
+          <span class="product-tag">受注生産品</span>
+          <div class="product-desc">
+            都内から眺めた丹沢主稜。大山から蛭ヶ岳までの稜線を細身の線で描いたリング。細身でも槌目模様をつけ、存在感のあるリング。
+          </div>
+          <div class="price-table">
+            <div class="price-row"><span class="price-material">Brass</span><span class="price-value">¥7,700</span></div>
+            <div class="price-row"><span class="price-material">Sv925</span><span class="price-value">¥14,300</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider-full"></div>
+
+    <!-- ===== 2999 (Signet Ring) ===== -->
+    <section class="section" id="2999">
+      <div class="section-label">Signet Ring</div>
+      <div class="section-title">2999</div>
+
+      <div class="product-photo">
+        <img src="./img/catalog/2999_main.jpg" alt="2999 剱岳等高線リング" loading="lazy">
+      </div>
+      <div class="product-photo-row" style="margin-top: 0.4rem;">
+        <div class="product-photo"><img src="./img/catalog/2999_stamp.jpg" alt="2999 内側刻印" loading="lazy"></div>
+        <div class="product-photo"><img src="./img/catalog/2999_angle.jpg" alt="2999 ディテール" loading="lazy"></div>
+      </div>
+
+      <div class="product-body">
+        <div class="product-desc" style="font-size: 12px; color: #c8c4bc; margin-top: 1.2rem;">
+          前剱から剱岳山頂部の等高線で制作。トップ面14.2mm角のシグネットリング。925シルバー、鏡面仕上げ、燻し加工。内側刻印：36°37′ 925
+        </div>
+        <div class="product-desc">
+          登山をする人なら誰もが親しみのある「等高線」という図と、古くから紋章や印章として使われてきた「シグネットリング」を掛け合わせたリング。
+        </div>
+        <div class="price-table">
+          <div class="price-row"><span class="price-material">Sv925（税込）</span><span class="price-value">¥48,400</span></div>
+        </div>
+        <div class="product-desc" style="margin-top: 1rem;">サイズ：13号 / 15号 / 17号 / 19号</div>
+        <div class="tier-note">
+          本製品は国土地理院ウェブサイトの地形データ（等高線）をもとに制作し、デザインとして編集・加工を加えたものです。出典：国土地理院ウェブサイト
+        </div>
+        <a class="detail-link" href="./2999.html">
+          <span>2999 詳細ページを見る</span>
+          <span>→</span>
+        </a>
+      </div>
+    </section>
+
+    <div class="divider-full"></div>
+
+    <!-- ===== EAR CUFFS / EARRINGS ===== -->
+    <section class="section" id="ear">
+      <div class="section-label">Accessory</div>
+      <div class="section-title">Ear Cuffs ・ Earrings</div>
+      <div class="body-text" style="margin-bottom: 2rem;">
+        2つのパーツを重ねることで1つの山のシルエットが完成する『kasane』モデルの意匠を、そのまま耳飾りに落とし込みました。
+      </div>
+
+      <div class="product">
+        <div class="product-photo">
+          <img src="./img/catalog/earcuffs.jpg" alt="Ear Cuffs" loading="lazy">
+        </div>
+        <div class="product-body">
+          <div class="product-name">Ear Cuffs</div>
+          <div class="product-desc">
+            独立した2つのイヤカフで構成されています。重ね付けをすることで『kasane』と同じ稜線が耳元に現れます。組み替えることで山の表情を自在に変えて楽しめます。
+          </div>
+          <div class="price-table">
+            <div class="price-row"><span class="price-material">Sv925</span><span class="price-value">¥9,900</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-photo">
+          <img src="./img/catalog/earrings.jpg" alt="Earrings" loading="lazy">
+        </div>
+        <div class="product-body">
+          <div class="product-name">Earrings</div>
+          <div class="product-desc">
+            イヤカフ2つ分の意匠を溶接し、1つのピアスとして再構築。山のラインを崩すことなく、耳元で存在感を放ちます。2層構造が生み出す陰影が、シルバーの質感をより深く引き立てます。
+          </div>
+          <div class="price-table">
+            <div class="price-row"><span class="price-material">Sv925</span><span class="price-value">¥13,200</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider-full"></div>
+
+    <!-- ===== TENUGUI CLIP ===== -->
+    <section class="section" id="tenugui">
+      <div class="section-label">Accessory</div>
+      <div class="section-title">手ぬぐいどめ</div>
+
+      <div class="product">
+        <div class="product-photo">
+          <img src="./img/catalog/tenugui_clip.jpg" alt="手ぬぐいどめ" loading="lazy">
+        </div>
+        <div class="product-body">
+          <div class="product-desc" style="font-size: 12px; color: #c8c4bc;">
+            実用性とデザイン性を両立。スポーツ手ぬぐいや、一般的な綿手ぬぐいの厚みに合わせて独自にサイズを設計。
+          </div>
+          <div class="price-table">
+            <div class="price-row"><span class="price-material">Brass</span><span class="price-value">¥5,000</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider-full"></div>
+
+    <!-- ===== FULLORDER ===== -->
+    <section class="section" id="fullorder">
+      <div class="section-label">Wedding &amp; Special Order</div>
+      <div class="section-title">Fullorder Ring</div>
+
+      <div class="product-photo">
+        <img src="./img/catalog/fullorder_main.jpg" alt="Fullorder ring" loading="lazy">
+      </div>
+
+      <div class="body-text" style="margin-top: 1.4rem;">
+        一からデザインを構築し、一点ずつ手作業で削り出して製作します。専門業者と提携することで、一生を共にするにふさわしい品質を確保しました。素材はシルバーのほか、K18ゴールドやプラチナでの製作も承ります。
+      </div>
+
+      <div class="tier-list">
+        <div class="tier-row"><span class="tier-name">SV925</span><span class="tier-price">¥88,000~</span></div>
+        <div class="tier-row"><span class="tier-name">K18</span><span class="tier-price">¥320,000~</span></div>
+        <div class="tier-row"><span class="tier-name">pt900</span><span class="tier-price">¥280,000~</span></div>
+      </div>
+      <div class="tier-note">※地金相場やデザインにより変動します。</div>
+
+      <div class="section-label" style="margin-top: 2.5rem;">製作実績</div>
+      <div class="product-photo-row">
+        <div class="product-photo"><img src="./img/catalog/fullorder_bandai_k18.jpg" alt="磐梯山 K18" loading="lazy"></div>
+        <div class="product-photo"><img src="./img/catalog/fullorder_sugoroku_pt900.jpg" alt="双六岳 pt900" loading="lazy"></div>
+      </div>
+      <div class="product-photo" style="margin-top: 0.4rem;">
+        <img src="./img/catalog/fullorder_suisho_set.jpg" alt="水晶岳 SV925 & K18" loading="lazy">
+      </div>
+      <div class="tier-note" style="margin-top: 0.8rem;">磐梯山 K18 ／ 双六岳 pt900 ／ 水晶岳 SV925 &amp; K18</div>
+    </section>
+
+    <div class="divider-full"></div>
+
+    <!-- ===== PRICE LIST ===== -->
+    <section class="section" id="price">
+      <div class="section-label">Product Price List</div>
+      <div class="section-title">価格一覧</div>
+
+      <div class="pricelist-group">
+        <div class="pricelist-group-title">稜線リング ／ Standard</div>
+        <div class="price-table">
+          <div class="price-row"><span class="price-material">Brass（真鍮）</span><span class="price-value">¥7,700</span></div>
+          <div class="price-row"><span class="price-material">Silver925</span><span class="price-value">¥11,000</span></div>
+        </div>
+      </div>
+
+      <div class="pricelist-group">
+        <div class="pricelist-group-title">稜線リング ／ kasane</div>
+        <div class="price-table">
+          <div class="price-row"><span class="price-material">Brass（真鍮）</span><span class="price-value">¥11,000</span></div>
+          <div class="price-row"><span class="price-material">Silver925</span><span class="price-value">¥14,300</span></div>
+        </div>
+      </div>
+
+      <div class="pricelist-group">
+        <div class="pricelist-group-title">Accessory</div>
+        <div class="price-table">
+          <div class="price-row"><span class="price-material">Ear Cuff</span><span class="price-value">¥9,900</span></div>
+          <div class="price-row"><span class="price-material">Earrings</span><span class="price-value">¥13,200</span></div>
+          <div class="price-row"><span class="price-material">手ぬぐいどめ</span><span class="price-value">¥5,000</span></div>
+        </div>
+      </div>
+
+      <div class="pricelist-group">
+        <div class="pricelist-group-title">Signet Ring</div>
+        <div class="price-table">
+          <div class="price-row"><span class="price-material">2999（等高線シグネットリング）</span><span class="price-value">¥48,400</span></div>
+        </div>
+      </div>
+
+      <div class="pricelist-group">
+        <div class="pricelist-group-title">Wedding &amp; Special Order</div>
+        <div class="price-table">
+          <div class="price-row"><span class="price-material">Silver925</span><span class="price-value">¥88,000~</span></div>
+          <div class="price-row"><span class="price-material">K18 Gold</span><span class="price-value">¥320,000~</span></div>
+          <div class="price-row"><span class="price-material">Platinum</span><span class="price-value">¥280,000~</span></div>
+        </div>
+        <div class="tier-note">※地金相場やデザインにより変動するため、個別にお見積もりいたします。</div>
+      </div>
+
+      <div class="note-box" style="margin-top: 2.5rem;">
+        <div class="section-label">納期について</div>
+        <div class="leadtime-item">
+          <div class="leadtime-label">受注生産品</div>
+          <div class="leadtime-text">受注確定より、通常3週間から4週間ほどで発送いたします。</div>
+        </div>
+        <div class="leadtime-item">
+          <div class="leadtime-label">オーダー品</div>
+          <div class="leadtime-text">デザイン確定より、約1.5ヶ月から2ヶ月の製作期間をいただいております。</div>
+        </div>
+        <div class="leadtime-item">
+          <div class="leadtime-text" style="color: #6a6860; font-size: 10px;">
+            一点ずつ手作業で製作しているため、展示会やイベントの受注状況により、納期が前後する場合がございます。正確な期日については、ご注文時に個別にご案内いたします。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider-full"></div>
+
+    <!-- ===== CONTACT ===== -->
+    <section class="section" id="contact">
+      <div class="section-label">Contact</div>
+      <div class="section-title">puna.moon</div>
+
+      <div class="contact-list">
+        <a class="link-btn" href="mailto:puna.moon.craft@gmail.com">
+          <span>puna.moon.craft@gmail.com</span>
+          <span class="link-arrow">→</span>
+        </a>
+        <a class="link-btn" href="https://punamoon.com" target="_blank">
+          <span>punamoon.com</span>
+          <span class="link-arrow">→</span>
+        </a>
+        <a class="link-btn" href="tel:08040040525">
+          <span>080-4004-0525</span>
+          <span class="link-arrow">→</span>
+        </a>
+        <a class="link-btn" href="https://www.instagram.com/puna.moon/" target="_blank">
+          <span>Instagram</span>
+          <span class="link-arrow">→</span>
+        </a>
+        <a class="link-btn" href="https://punamoon.base.shop" target="_blank">
+          <span>Online Shop</span>
+          <span class="link-arrow">→</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">© puna.moon</footer>
+
+</body>
+</html>
