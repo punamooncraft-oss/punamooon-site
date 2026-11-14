@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://tile.openstreetmap.org https://cdnjs.cloudflare.com; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>Stockists — puna.moon</title>
+  <meta name="description" content="puna.moon の取り扱い店舗。地図とリングから、取り扱い店舗を探せます。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0e0e0c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Jost', sans-serif;
+      color: #c8c4bc;
+    }
+    .page { width: 100%; max-width: 480px; }
+
+    /* ── HEADER ── */
+    .header {
+      padding: 1.4rem 2rem 1.2rem;
+      display: flex; align-items: baseline; justify-content: space-between;
+      border-bottom: 0.5px solid #2e2d2a;
+    }
+    .brand {
+      font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.1rem;
+      color: #f0ede8; text-decoration: none; letter-spacing: 0.12em;
+    }
+    .brand .dot { color: #a8a090; }
+    .back {
+      font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase;
+      color: #6a6860; text-decoration: none; font-weight: 200;
+    }
+    .back:hover { color: #c8c4bc; }
+
+    .draft-banner {
+      margin: 1rem 2rem 0; padding: 0.7rem 1rem;
+      border: 0.5px solid #8a5a3a; color: #d0a080;
+      font-size: 10px; letter-spacing: 0.12em; line-height: 1.8;
+    }
+
+    .intro {
+      padding: 2.2rem 2rem 1.4rem;
+      opacity: 0; transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards; animation-delay: 0.05s;
+    }
+    .title {
+      font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.6rem;
+      color: #f0ede8; letter-spacing: 0.2em; line-height: 1;
+    }
+    .title-sub {
+      font-size: 9px; letter-spacing: 0.4em; color: #6a6860; font-weight: 200;
+      text-transform: uppercase; margin-top: 0.5rem;
+    }
+    .lead {
+      font-size: 11px; letter-spacing: 0.1em; color: #9a968e; font-weight: 200;
+      line-height: 2; margin-top: 1.2rem;
+    }
+
+    /* ── RING FILTER ── */
+    .filter {
+      padding: 0 2rem 1.4rem;
+      opacity: 0; transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards; animation-delay: 0.1s;
+    }
+    .filter-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.7rem;
+    }
+    .filter-label {
+      font-size: 9px; letter-spacing: 0.35em; color: #6a6860; text-transform: uppercase;
+    }
+    .filter-clear {
+      background: none; border: none; font-family: inherit; cursor: pointer;
+      font-size: 9px; letter-spacing: 0.25em; color: #a8a090; text-transform: uppercase;
+    }
+    .filter-clear[hidden] { display: none; }
+    .chip-group + .chip-group { margin-top: 0.8rem; }
+    .chip-group-name { font-size: 9px; letter-spacing: 0.25em; color: #5a5850; margin-bottom: 0.4rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .chip {
+      font-family: inherit; font-size: 10px; letter-spacing: 0.1em;
+      padding: 0.38rem 0.7rem; background: transparent;
+      border: 0.5px solid #3a3830; color: #c8c4bc; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chip:hover { border-color: #6a6860; color: #f0ede8; }
+    .chip.on { background: #f0ede8; border-color: #f0ede8; color: #0e0e0c; }
+
+
+    .result {
+      margin-top: 1rem; padding: 0.9rem 1rem;
+      border-left: 1.5px solid #a8a090; background: rgba(255,255,255,0.02);
+      font-size: 10.5px; letter-spacing: 0.08em; line-height: 1.9; color: #c8c4bc;
+    }
+    .result[hidden] { display: none; }
+    .result strong { color: #f0ede8; font-weight: 400; }
+    .ring-links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin-top: 0.8rem; }
+    .ring-links a { font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: #a8a090; text-decoration: none; border-bottom: 0.5px solid #5a5850; padding-bottom: 2px; }
+    .ring-links a:hover { color: #f0ede8; }
+    .ring-photo { display: block; width: 78%; aspect-ratio: 1 / 1; height: auto; object-fit: cover; object-position: center; margin-bottom: 0.9rem; filter: brightness(0.92); animation: cardIn 0.35s ease; }
+
+    /* ── MAP ── */
+    .map-wrap {
+      position: relative;
+      opacity: 0; transform: translateY(12px);
+      animation: fadeUp 0.8s ease forwards; animation-delay: 0.15s;
+    }
+    #map {
+      width: 100%; aspect-ratio: 1 / 1; background: #141412;
+      border-top: 0.5px solid #2e2d2a; border-bottom: 0.5px solid #2e2d2a;
+    }
+    .leaflet-container { font-family: 'Jost', sans-serif; background: #141412; }
+    /* OSMの明るい地図を、サイトに合わせて暗い墨色に反転 */
+    .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) grayscale(0.9) brightness(0.62) contrast(0.95); }
+    .leaflet-control-attribution {
+      background: rgba(14,14,12,0.75) !important; color: #6a6860 !important; font-size: 8px !important;
+    }
+    .leaflet-control-attribution a { color: #8a8680 !important; }
+    .leaflet-bar a { background: #1a1a18 !important; color: #c8c4bc !important; border-bottom-color: #2e2d2a !important; }
+    .leaflet-bar { border: 0.5px solid #3a3830 !important; box-shadow: none !important; }
+
+    /* pin：暗い地図の上で目立つよう、明るい芯＋輪＋柔らかい光 */
+    .pin { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .pin span {
+      position: relative; display: block; width: 15px; height: 15px; border-radius: 50%;
+      background: #e8d9b0;
+      border: 2.5px solid #0e0e0c;
+      box-shadow: 0 0 0 1.5px #e8d9b0, 0 0 12px 3px rgba(232,217,176,0.45);
+      transition: all 0.2s ease;
+    }
+    .pin.active span {
+      width: 20px; height: 20px; background: #ffffff;
+      box-shadow: 0 0 0 2px #ffffff, 0 0 0 7px rgba(255,255,255,0.18), 0 0 18px 6px rgba(255,255,255,0.35);
+    }
+    .pin.dim span { opacity: 0.18; box-shadow: none; }
+
+    .map-hint {
+      position: absolute; right: 0.8rem; top: 0.8rem; z-index: 500;
+      font-size: 9px; letter-spacing: 0.25em; color: #8a8680;
+      background: rgba(14,14,12,0.7); padding: 0.35rem 0.6rem; pointer-events: none;
+    }
+
+    /* ── STORE CARD ── */
+    .card { margin: 0 2rem; padding: 1.5rem 0 1.8rem; border-bottom: 0.5px solid #2e2d2a; min-height: 9rem; }
+    .card-empty { font-size: 10px; letter-spacing: 0.25em; color: #6a6860; padding-top: 2rem; text-align: center; }
+    .card-area { font-size: 9px; letter-spacing: 0.35em; color: #6a6860; text-transform: uppercase; }
+    .card-name {
+      font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 1.35rem;
+      color: #f0ede8; letter-spacing: 0.06em; margin-top: 0.4rem; line-height: 1.3;
+    }
+    .card-sub { font-size: 10.5px; letter-spacing: 0.1em; color: #a8a090; margin-top: 0.25rem; }
+    .card-fade { animation: cardIn 0.35s ease; }
+    .card-row { display: flex; gap: 1rem; margin-top: 0.9rem; font-size: 11px; letter-spacing: 0.06em; line-height: 1.8; }
+    .card-label {
+      flex-shrink: 0; width: 4.2rem; font-size: 9px; letter-spacing: 0.25em;
+      color: #6a6860; text-transform: uppercase; padding-top: 0.15rem;
+    }
+    .card-value { color: #c8c4bc; font-weight: 300; }
+    .card-value a { color: #c8c4bc; text-decoration: none; border-bottom: 0.5px solid #5a5850; }
+    .card-value a:hover { color: #f0ede8; border-color: #a8a090; }
+    .card-value .muted { color: #8a8680; font-size: 10px; }
+    .card-also { margin-top: 1.2rem; padding-top: 1rem; border-top: 0.5px dashed #2e2d2a; }
+    .card-also-name { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: #f0ede8; letter-spacing: 0.06em; }
+    .tbd { color: #b07850; font-size: 10px; letter-spacing: 0.15em; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .tag {
+      font-size: 10px; letter-spacing: 0.1em; padding: 0.3rem 0.65rem;
+      border: 0.5px solid #3a3830; color: #c8c4bc; white-space: nowrap;
+    }
+    .tag.only { border-color: #a8a090; color: #f0ede8; }
+    .tag.hit { background: #f0ede8; border-color: #f0ede8; color: #0e0e0c; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 2.6rem 2rem 0; }
+    .section-label {
+      font-size: 9px; letter-spacing: 0.4em; color: #6a6860; font-weight: 200;
+      text-transform: uppercase; margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 1.25rem;
+      color: #f0ede8; letter-spacing: 0.12em; margin-bottom: 1.2rem;
+    }
+    .section-note { font-size: 10px; letter-spacing: 0.08em; color: #8a8680; line-height: 1.9; margin-bottom: 1.2rem; }
+
+    /* store list（都道府県 → 店舗） */
+    .area { border-top: 0.5px solid #2e2d2a; }
+    .area:last-of-type { border-bottom: 0.5px solid #2e2d2a; }
+    .area > summary {
+      list-style: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 0; font-size: 12px; letter-spacing: 0.25em; color: #f0ede8;
+    }
+    .area > summary::-webkit-details-marker { display: none; }
+    .area-count { font-size: 9px; letter-spacing: 0.2em; color: #6a6860; }
+    .area-caret { color: #6a6860; font-size: 11px; margin-left: 0.8rem; transition: transform 0.2s; display: inline-block; }
+    .area[open] .area-caret { transform: rotate(90deg); }
+    .area-body { padding: 0 0 0.6rem 1rem; border-left: 0.5px solid #2e2d2a; margin: 0 0 0.8rem 0.2rem; }
+    .store-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 0.75rem 0; background: none; border: none; border-bottom: 0.5px solid #1e1e1c;
+      color: #c8c4bc; font-family: inherit; font-size: 12px; letter-spacing: 0.06em;
+      font-weight: 300; text-align: left; cursor: pointer;
+    }
+    .store-btn:last-child { border-bottom: none; }
+    .store-btn:hover, .store-btn.active { color: #f0ede8; }
+    .store-btn small { display: block; font-size: 9.5px; color: #6a6860; letter-spacing: 0.08em; margin-top: 0.2rem; }
+    .store-btn .arrow { color: #3a3830; font-size: 11px; transition: all 0.2s; flex-shrink: 0; }
+    .store-btn.active .arrow { color: #e8d9b0; }
+    .store-btn[hidden], .area[hidden] { display: none; }
+    .list-empty { font-size: 10px; letter-spacing: 0.12em; color: #6a6860; padding: 1rem 0; line-height: 1.8; }
+
+    /* box (online / base / event) */
+    .box { border: 0.5px solid #2e2d2a; padding: 1.3rem; background: rgba(255,255,255,0.015); transition: opacity 0.2s; }
+    .box + .box { margin-top: 0.6rem; }
+    .box.dim { opacity: 0.3; }
+    .box-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: #f0ede8; letter-spacing: 0.06em; }
+    .box-meta { font-size: 10px; letter-spacing: 0.1em; color: #8a8680; margin-top: 0.35rem; line-height: 1.8; }
+    .box .tags { margin-top: 0.9rem; }
+    .box-links { display: flex; flex-wrap: wrap; gap: 0 1.4rem; }
+    .box-link {
+      display: inline-flex; gap: 0.5rem; margin-top: 1rem; font-size: 9px; letter-spacing: 0.3em;
+      text-transform: uppercase; color: #a8a090; text-decoration: none;
+    }
+    .box-link:hover { color: #f0ede8; }
+
+    .footer {
+      width: 100%; margin-top: 3.5rem; padding: 2.4rem 2rem; text-align: center;
+      font-size: 9px; letter-spacing: 0.3em; color: #2e2d2a; text-transform: uppercase;
+      font-weight: 200; border-top: 0.5px solid #2e2d2a;
+    }
+
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <a href="./index.html" class="brand">puna<span class="dot">.</span>moon</a>
+    <a href="./index.html" class="back">← Index</a>
+  </header>
+
+  <div class="draft-banner" id="draftBanner" hidden></div>
+
+  <section class="intro">
+    <div class="title">Stockists</div>
+    <div class="title-sub">取り扱い店舗</div>
+    <p class="lead">地図のピンをタップすると、店舗の情報と取り扱いリングが表示されます。リングから取り扱い店舗を探すこともできます。</p>
+  </section>
+
+  <section class="filter" aria-label="リングから探す">
+    <div class="filter-head">
+      <span class="filter-label">Find by ring</span>
+      <button class="filter-clear" id="filterClear" hidden>× 解除</button>
+    </div>
+    <div id="chips"></div>
+    <div class="result" id="result" aria-live="polite" hidden></div>
+  </section>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-hint">TAP A PIN</div>
+  </div>
+
+  <div class="card" id="card" aria-live="polite">
+    <div class="card-empty">店舗を選んでください</div>
+  </div>
+
+  <section class="section">
+    <div class="section-label">Store list</div>
+    <div class="section-title">店舗一覧</div>
+    <div id="storeList"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Online</div>
+    <div class="section-title">オンラインのお取り扱い</div>
+    <div id="onlineList"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Event / Pop-up</div>
+    <div class="section-title">イベント出店・POPUP</div>
+    <p class="section-note">イベント・POPUPでは、全てのアイテムをご覧いただけます。</p>
+    <div id="eventList"></div>
+  </section>
+
+  <footer class="footer">© puna.moon</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+/* =========================================================
+   データ（ここだけ書き換えればページに反映されます）
+   - rings の名前は下の RING_GROUPS と同じ表記にすると「リングから探す」で見つかります
+   - only: true はその店舗でのみ扱うリングの目印（画面には表示しません）
+   - also は同じ店舗カードに併記する別の場所（例：ゲストハウス松葉屋）
+   - DRAFT = true の間は、上部にテスト版の表示と「要確認」が出ます（公開前に false）
+   ========================================================= */
+const DRAFT = false;
+
+const STORES = [
+  /* ── 東京 ── */
+  { id: 'blackbrick', name: 'BLACK BRICK', area: '東京',
+    address: '東京都武蔵野市吉祥寺本町1-22-5 サンウッド吉祥寺フラッツ101', instagram: 'blackbrick_official',
+    lat: 35.70489, lng: 139.58212,
+    rings: [{ name: 'BLACK BRICK 別注', only: true }, { name: '槍穂' }, { name: 'kasane 槍穂' }, { name: '丹沢' }, { name: '尾瀬' }, { name: '手ぬぐいどめ' }] },
+  { id: 'urbanhutte', name: 'urban hutte koenji', area: '東京',
+    address: '東京都杉並区高円寺北3-21-12 それいゆB1', instagram: 'urban_hutte_koenji',
+    lat: 35.70653, lng: 139.64850,
+    rings: [{ name: '槍穂' }, { name: 'kasane 槍穂' }] },
+  { id: 'yamatabi', name: '山旅ショップ', sub: '山と旅の道具「山旅」直営店', area: '東京',
+    address: '東京都江東区白河1-3-13 清洲寮 ハ-11号（210）', instagram: 'yamatabitabi',
+    note: '営業：金・土・日 13:00〜18:00（歴史ある建物のため、靴を脱いでお上がりください）',
+    lat: 35.68201, lng: 139.79994,
+    rings: [{ name: '表銀座', only: true }, { name: 'kasane 表銀座', only: true }] },
+  { id: 'hachioji', name: '八王子登山用品店', area: '東京',
+    address: '東京都八王子市中町9-9 山田ビル2階', instagram: 'hachioji_tozan_yohinten',
+    lat: 35.65892, lng: 139.33516,
+    rings: [{ name: '槍穂' }, { name: 'kasane 槍穂' }, { name: 'イヤカフ' }, { name: 'ピアス' }, { name: '手ぬぐいどめ' }] },
+
+  /* ── 山梨 ── */
+  { id: 'standardpoint', name: 'STANDARD point', area: '山梨',
+    address: '山梨県南都留郡富士河口湖町小立8017-1 フォレストモール富士河口湖内', instagram: 'standard_point',
+    lat: 35.49102, lng: 138.74196,
+    rings: [{ name: '槍穂' }, { name: 'kasane 槍穂' }, { name: '手ぬぐいどめ' }] },
+
+  /* ── 長野 ── */
+  { id: 'mitsumata', name: '三俣山荘図書室', area: '長野',
+    address: '長野県大町市大町2557 旧金萬呉服店3F', instagram: 'mitsu_tosho',
+    lat: 36.50481, lng: 137.85966,
+    also: { name: 'ゲストハウス松葉屋', address: '長野県大町市大町4079', instagram: 'matsubaya.guesthouse' },
+    rings: [{ name: '裏銀', only: true }, { name: '鷲羽', only: true }] },
+  { id: 'itomizu', name: 'ITOMIZU', area: '長野',
+    address: '長野県北安曇郡松川村5261', instagram: 'itomizu_official',
+    lat: 36.39086, lng: 137.86390,
+    rings: [{ name: '槍穂' }, { name: '有明山', only: true }, { name: '手ぬぐいどめ' }] },
+  { id: 'kokemomo', name: '山とビールの店コケモモ', sub: 'KOKEMOMO Beer Bar & Bottle Shop', area: '長野',
+    address: '長野県北安曇郡白馬村北城3020-1378', instagram: 'kokemomo_beer',
+    lat: 36.69338, lng: 137.83951,
+    rings: [{ name: '白馬' }, { name: 'kasane 白馬' }] },
+  { id: 'kurumu', name: 'CAFÉ & GALLERY KURUMu', area: '長野',
+    address: '長野県松本市安曇4307-1（乗鞍高原・一の瀬）', instagram: 'kurumu_norikura',
+    note: '冬季休業あり',
+    lat: 36.11136, lng: 137.62664,
+    rings: [{ name: '乗鞍', only: true }] },
+
+  /* ── 福岡 ── */
+  { id: 'mujina', name: 'mujina shouten', sub: 'むじな商店', area: '福岡',
+    address: '福岡県糸島市泊647-2（DURAM FACTORY SHOP 糸島店 内）', instagram: 'mujinashouten',
+    lat: 33.57979, lng: 130.21495,
+    rings: [{ name: '星生山' }, { name: '星生山（細）', only: true }, { name: '手ぬぐいどめ' }] },
+];
+
+/* オンラインのみの店舗（地図には出ません） */
+const ONLINE = [
+  { name: 'hinataストア', url: 'https://store.hinata.me/', instagram: 'hinatastore_official',
+    rings: [{ name: '八ヶ岳' }, { name: 'kasane 八ヶ岳' }] },
+];
+
+/* puna.moon 公式オンラインショップ */
+const BASE = { name: 'puna.moon Online Shop（BASE）', url: 'https://punamoon.base.shop',
+  note: '約2ヶ月に1回のペースで不定期オープンしています。オープン時期はInstagramでお知らせします。',
+  rings: [{ name: '2999' }, { name: '槍穂' }, { name: 'kasane 槍穂' }, { name: '八ヶ岳' }, { name: 'kasane 八ヶ岳' }, { name: '白馬' }, { name: 'kasane 白馬' }, { name: '尾瀬' },
+          { name: '丹沢' }, { name: '星生山' }, { name: '阿蘇五岳' }, { name: 'Raicho' }, { name: 'Karasawa' },
+          { name: 'イヤカフ' }, { name: 'ピアス' }, { name: '手ぬぐいどめ' }] };
+
+/* イベント出店・POPUP：日程は Instagram で案内（ページ側は更新しない） */
+const EVENT_INFO = { instagram: 'puna.moon' };
+
+/* 「リングから探す」に並べる順番 */
+const RING_GROUPS = [
+  { name: '等高線シグネットリング', rings: ['2999'] },
+  { name: '稜線リング', rings: ['槍穂', 'kasane 槍穂', '八ヶ岳', 'kasane 八ヶ岳', '白馬', 'kasane 白馬', '尾瀬', '丹沢',
+                            '星生山', '阿蘇五岳',
+                            '裏銀', '鷲羽', '乗鞍', '有明山', '表銀座', 'kasane 表銀座', '星生山（細）', 'BLACK BRICK 別注'] },
+  { name: 'Brocken', rings: ['Raicho', 'Karasawa'] },
+  { name: 'アクセサリー', rings: ['イヤカフ', 'ピアス', '手ぬぐいどめ'] },
+];
+
+/* リングの写真（photo）、Instagram投稿（ig）、BASEの商品ページ（base）。ig・base はリングを選んだときにリンクとして出ます */
+const RING_MEDIA = {
+  '2999':           { photo: './img/stockists/2999.jpg', ig: 'https://www.instagram.com/p/DZkWQjRTlMW/', base: 'https://punamoon.base.shop/items/146827038' },
+  '槍穂':             { photo: './img/stockists/yariho.jpg', ig: 'https://www.instagram.com/p/C_stF3pPTSV/', base: 'https://punamoon.base.shop/items/118172265' },
+  'kasane 槍穂':      { photo: './img/stockists/kasane_yariho.jpg', ig: 'https://www.instagram.com/p/DQbpax2kaRl/', base: 'https://punamoon.base.shop/items/118172265' },
+  '八ヶ岳':            { photo: './img/stockists/yatsugatake.jpg', ig: 'https://www.instagram.com/p/DQk5PeIExYK/', base: 'https://punamoon.base.shop/items/128118802' },
+  'kasane 八ヶ岳':     { photo: './img/stockists/kasane_yatsugatake.jpg', ig: 'https://www.instagram.com/p/DSpFNx9kUw4/', base: 'https://punamoon.base.shop/items/128118802' },
+  '白馬':             { photo: './img/stockists/hakuba.jpg', ig: 'https://www.instagram.com/p/DQLR9B6ESle/', base: 'https://punamoon.base.shop/items/137978361' },
+  'kasane 白馬':      { photo: './img/stockists/kasane_hakuba.jpg', ig: 'https://www.instagram.com/p/DVqa0TmERvV/', base: 'https://punamoon.base.shop/items/137978361' },
+  '尾瀬':             { photo: './img/stockists/oze.jpg', ig: 'https://www.instagram.com/p/DZ2AZz0kbO3/', base: 'https://punamoon.base.shop/items/147135754' },
+  '丹沢':             { photo: './img/stockists/tanzawa.jpg', ig: 'https://www.instagram.com/p/DZ4ZuJykako/', base: 'https://punamoon.base.shop/items/147235776' },
+  '星生山':            { photo: './img/stockists/hosshosan.jpg', ig: 'https://www.instagram.com/p/De_FnpykcA_/', base: 'https://punamoon.base.shop/items/165737087' },
+  '星生山（細）':         { photo: './img/stockists/hosshosan_thin.jpg', ig: 'https://www.instagram.com/p/DfHbMRzk4qq/' },
+  '阿蘇五岳':           { photo: './img/stockists/aso.jpg', ig: 'https://www.instagram.com/p/DeTvTuMR2Fe/', base: 'https://punamoon.base.shop/items/165737370' },
+  '裏銀':             { photo: './img/stockists/uragin.jpg', ig: 'https://www.instagram.com/p/DIqJsLuPa3Y/' },
+  '鷲羽':             { photo: './img/stockists/washiba.jpg', ig: 'https://www.instagram.com/p/DMcxU48zZ3w/' },
+  '乗鞍':             { photo: './img/stockists/norikura.jpg', ig: 'https://www.instagram.com/p/DDwSGHnTONM/' },
+  '有明山':            { photo: './img/stockists/ariake.jpg' },
+  '表銀座':            { photo: './img/stockists/omoteginza.jpg', ig: 'https://www.instagram.com/p/Dcf7WBEEZOa/' },
+  'kasane 表銀座':     { photo: './img/stockists/kasane_omoteginza.jpg', ig: 'https://www.instagram.com/p/Dcf7WBEEZOa/' },
+  'BLACK BRICK 別注': { photo: './img/stockists/bb_custom.jpg', ig: 'https://www.instagram.com/p/DMxV_hGz08w/' },
+  'Raicho':    { photo: './img/stockists/brocken_raicho.jpg', ig: 'https://www.instagram.com/p/DfmloSlkxlD/', base: 'https://punamoon.base.shop/items/165634198' },
+  'Karasawa':     { photo: './img/stockists/brocken_karasawa.jpg', ig: 'https://www.instagram.com/p/Dfml8kCEzPv/', base: 'https://punamoon.base.shop/items/165737233' },
+  'イヤカフ':           { photo: './img/stockists/earcuff.jpg', ig: 'https://www.instagram.com/p/DSNJ0hfERSY/', base: 'https://punamoon.base.shop/items/128117962' },
+  'ピアス':            { photo: './img/stockists/earrings.jpg', ig: 'https://www.instagram.com/p/DSHu4DdkVyU/', base: 'https://punamoon.base.shop/items/128118481' },
+  '手ぬぐいどめ':         { photo: './img/stockists/tenugui.jpg', ig: 'https://www.instagram.com/p/DZuDTv3EcaY/', base: 'https://punamoon.base.shop/items/141639788' },
+};
+
+/* 店舗一覧に並べる地域の順番 */
+const AREA_ORDER = ['東京', '山梨', '長野', '福岡'];
+/* ========================================================= */
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const igHandle = s => s.replace(/^@/, '').trim();
+const tbd = label => DRAFT ? `<span class="tbd">${label}</span>` : '';
+const has = (rings, ring) => rings.some(r => r.name === ring);
+let activeRing = null;
+let activeId = null;
+
+function tagsHtml(rings) {
+  if (!rings.length) return DRAFT ? tbd('取り扱いリング要確認') : '';
+  return '<div class="tags">' + rings.map(r =>
+    `<span class="tag${r.name === activeRing ? ' hit' : ''}">${esc(r.name)}</span>`
+  ).join('') + '</div>';
+}
+const igLink = h => `<a href="https://www.instagram.com/${encodeURIComponent(igHandle(h))}/" target="_blank" rel="noopener">@${esc(igHandle(h))}</a>`;
+const mapLink = a => `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.replace(/（.*?）/g, ''))}" target="_blank" rel="noopener">${esc(a)}</a>`;
+function row(label, valueHtml) {
+  if (!valueHtml) return '';
+  return `<div class="card-row"><div class="card-label">${label}</div><div class="card-value">${valueHtml}</div></div>`;
+}
+
+function renderCard(s) {
+  const addr = (s.address ? mapLink(s.address) : tbd('住所要確認')) + (s.addressCheck && DRAFT ? `<br>${tbd('住所の表記ゆれあり・要確認')}` : '');
+  const also = s.also ? `
+      <div class="card-also">
+        <div class="card-label" style="width:auto;margin-bottom:0.3rem;">併記</div>
+        <div class="card-also-name">${esc(s.also.name)}</div>
+        ${row('Address', s.also.address ? mapLink(s.also.address) : '')}
+        ${row('Instagram', s.also.instagram ? igLink(s.also.instagram) : '')}
+      </div>` : '';
+  document.getElementById('card').innerHTML = `
+    <div class="card-fade">
+      <div class="card-area">${esc(s.area)}</div>
+      <div class="card-name">${esc(s.name)}</div>
+      ${s.sub ? `<div class="card-sub">${esc(s.sub)}</div>` : ''}
+      ${row('Address', addr)}
+      ${row('Instagram', s.instagram ? igLink(s.instagram) : tbd('アカウント要確認'))}
+      ${row('Info', s.note ? `<span class="muted">${esc(s.note)}</span>` : '')}
+      ${row('Rings', tagsHtml(s.rings))}
+      ${also}
+    </div>`;
+}
+
+/* ── map ── */
+const map = L.map('map', { zoomControl: true, scrollWheelZoom: false });
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+
+const markers = {};
+STORES.forEach(s => {
+  const icon = L.divIcon({ className: '', html: '<div class="pin"><span></span></div>', iconSize: [34, 34], iconAnchor: [17, 17] });
+  const m = L.marker([s.lat, s.lng], { icon, title: s.name, keyboard: true }).addTo(map);
+  m.on('click', () => select(s.id, { pan: false }));
+  markers[s.id] = m;
+});
+
+/* 地図の何もないところをタップ → 近くの店舗の都道府県全体へズーム（遠い場所なら一段ズーム） */
+map.on('click', e => {
+  const pool = visibleStores().length ? visibleStores() : STORES;
+  let near = null, best = Infinity;
+  pool.forEach(s => { const d = map.distance(e.latlng, [s.lat, s.lng]); if (d < best) { best = d; near = s; } });
+  if (near && best < 150000) {
+    const group = pool.filter(s => s.area === near.area);
+    const b = L.latLngBounds(group.map(s => [s.lat, s.lng]));
+    const target = group.length === 1 ? 12 : Math.min(map.getBoundsZoom(b, false, L.point(60, 60)), 13);
+    if (map.getZoom() >= target - 0.5) map.flyTo(e.latlng, Math.min(map.getZoom() + 2, 15), { duration: 0.5 });
+    else if (group.length === 1) map.flyTo([near.lat, near.lng], target, { duration: 0.6 });
+    else map.flyToBounds(b, { padding: [60, 60], maxZoom: 13, duration: 0.6 });
+  } else {
+    map.flyTo(e.latlng, Math.min(map.getZoom() + 2, 15), { duration: 0.5 });
+  }
+});
+
+function visibleStores() { return STORES.filter(s => !activeRing || has(s.rings, activeRing)); }
+function fitTo(list) {
+  if (!list.length) return;
+  if (list.length === 1) map.setView([list[0].lat, list[0].lng], 11);
+  else map.fitBounds(L.latLngBounds(list.map(s => [s.lat, s.lng])), { padding: [30, 30], maxZoom: 11 });
+}
+
+function select(id, { pan = true } = {}) {
+  const s = STORES.find(x => x.id === id);
+  if (!s) return;
+  activeId = id;
+  Object.entries(markers).forEach(([k, m]) => {
+    m.getElement()?.querySelector('.pin')?.classList.toggle('active', k === id);
+    m.setZIndexOffset(k === id ? 1000 : 0);
+  });
+  document.querySelectorAll('.store-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  renderCard(s);
+  if (pan) map.flyTo([s.lat, s.lng], Math.max(map.getZoom(), 10), { duration: 0.6 });
+}
+
+/* ── store list（都道府県 → 店舗） ── */
+const listEl = document.getElementById('storeList');
+const areas = [...new Set([...AREA_ORDER, ...STORES.map(s => s.area)])].filter(a => STORES.some(s => s.area === a));
+listEl.innerHTML = areas.map(a => {
+  const list = STORES.filter(s => s.area === a);
+  return `
+  <details class="area" data-area="${esc(a)}" open>
+    <summary><span>${esc(a)}<span class="area-caret">›</span></span><span class="area-count" data-count></span></summary>
+    <div class="area-body">
+      ${list.map(s => `<button class="store-btn" data-id="${s.id}"><span>${esc(s.name)}${s.sub ? `<small>${esc(s.sub)}</small>` : ''}</span><span class="arrow">●</span></button>`).join('')}
+    </div>
+  </details>`;
+}).join('') + '<div class="list-empty" id="listEmpty" hidden>このリングを扱う実店舗はありません。オンライン・イベントをご覧ください。</div>';
+listEl.addEventListener('click', e => {
+  const b = e.target.closest('.store-btn');
+  if (!b) return;
+  select(b.dataset.id);
+  document.querySelector('.map-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+/* ── online + BASE ── */
+function renderOnline() {
+  document.getElementById('onlineList').innerHTML =
+    ONLINE.map(o => `
+      <div class="box${activeRing && !has(o.rings, activeRing) ? ' dim' : ''}">
+        <div class="box-name">${esc(o.name)}</div>
+        <div class="box-meta">オンラインストアでのお取り扱い</div>
+        ${tagsHtml(o.rings)}
+        <div class="box-links">
+          ${o.url ? `<a class="box-link" href="${esc(o.url)}" target="_blank" rel="noopener"><span>Store</span><span>→</span></a>` : (DRAFT ? `<div class="box-meta">${tbd('URL要確認')}</div>` : '')}
+          ${o.instagram ? `<a class="box-link" href="https://www.instagram.com/${encodeURIComponent(igHandle(o.instagram))}/" target="_blank" rel="noopener"><span>@${esc(igHandle(o.instagram))}</span><span>→</span></a>` : ''}
+        </div>
+      </div>`).join('') + `
+      <div class="box${activeRing && !has(BASE.rings, activeRing) ? ' dim' : ''}">
+        <div class="box-name">${esc(BASE.name)}</div>
+        <div class="box-meta">${esc(BASE.note)}</div>
+        ${tagsHtml(BASE.rings)}
+        <a class="box-link" href="${esc(BASE.url)}" target="_blank" rel="noopener"><span>Online Shop</span><span>→</span></a>
+      </div>`;
+}
+
+/* ── events ── */
+function renderEvents() {
+  document.getElementById('eventList').innerHTML = `
+    <div class="box">
+      <div class="box-meta" style="margin-top:0">出店予定はInstagramでお知らせしています。最新の情報はInstagramをご覧ください。</div>
+      <div class="tags" style="margin-top:0.9rem;"><span class="tag only">全てのアイテム</span></div>
+      <a class="box-link" href="https://www.instagram.com/${encodeURIComponent(EVENT_INFO.instagram)}/" target="_blank" rel="noopener"><span>@${esc(EVENT_INFO.instagram)}</span><span>→</span></a>
+    </div>`;
+}
+
+/* ── ring filter（リングから探す） ── */
+const chipsEl = document.getElementById('chips');
+chipsEl.innerHTML = RING_GROUPS.map(g => `
+  <div class="chip-group">
+    <div class="chip-group-name">${esc(g.name)}</div>
+    <div class="chips">${g.rings.map(r => `<button class="chip" data-ring="${esc(r)}">${esc(r)}</button>`).join('')}</div>
+  </div>`).join('');
+chipsEl.addEventListener('click', e => {
+  const c = e.target.closest('.chip');
+  if (!c) return;
+  applyRing(activeRing === c.dataset.ring ? null : c.dataset.ring);
+});
+document.getElementById('filterClear').addEventListener('click', () => applyRing(null));
+
+function applyRing(ring) {
+  activeRing = ring;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.ring === ring));
+  document.getElementById('filterClear').hidden = !ring;
+
+  const vis = visibleStores();
+  const visIds = new Set(vis.map(s => s.id));
+  Object.entries(markers).forEach(([k, m]) => {
+    m.getElement()?.querySelector('.pin')?.classList.toggle('dim', !visIds.has(k));
+  });
+  document.querySelectorAll('.store-btn').forEach(b => { b.hidden = !visIds.has(b.dataset.id); });
+  document.querySelectorAll('.area').forEach(a => {
+    const n = STORES.filter(s => s.area === a.dataset.area && visIds.has(s.id)).length;
+    a.hidden = n === 0;
+    a.querySelector('[data-count]').textContent = `${n} 店舗`;
+  });
+  document.getElementById('listEmpty').hidden = vis.length > 0;
+
+  const res = document.getElementById('result');
+  if (ring) {
+    const online = [...ONLINE.filter(o => has(o.rings, ring)).map(o => o.name), ...(has(BASE.rings, ring) ? ['BASE'] : [])];
+    const media = RING_MEDIA[ring] || {};
+    const mediaHtml = media.photo ? `<img class="ring-photo" src="${esc(media.photo)}" alt="${esc(ring)}" loading="lazy">` : '';
+    res.innerHTML = `${mediaHtml}<strong>${esc(ring)}</strong> を扱っている場所<br>
+      店舗：${vis.length ? vis.map(s => esc(s.name)).join('、') : 'なし'}<br>
+      ${online.length ? `オンライン：${online.map(esc).join('、')}<br>` : ''}
+      イベント・POPUP
+      ${media.ig || media.base ? `<div class="ring-links">
+        ${media.ig ? `<a href="${esc(media.ig)}" target="_blank" rel="noopener">Instagramで見る →</a>` : ''}
+        ${media.base ? `<a href="${esc(media.base)}" target="_blank" rel="noopener">BASEで見る →</a>` : ''}
+      </div>` : ''}`;
+    res.hidden = false;
+    if (activeId && !visIds.has(activeId)) {
+      activeId = null;
+      document.getElementById('card').innerHTML = '<div class="card-empty">店舗を選んでください</div>';
+    }
+    fitTo(vis.length ? vis : STORES);
+  } else {
+    res.hidden = true;
+    fitTo(STORES);
+  }
+  if (activeId) renderCard(STORES.find(s => s.id === activeId));
+  renderOnline();
+}
+
+/* 何もないところをタップしたら、リングの選択を解除 */
+document.addEventListener('click', e => {
+  if (!activeRing) return;
+  if (e.target.closest('.chip, .filter-clear, #map, .card, .store-btn, .area > summary, .result, a, button')) return;
+  applyRing(null);
+});
+
+/* ── init ── */
+renderEvents();
+applyRing(null);
+
+if (DRAFT) {
+  const b = document.getElementById('draftBanner');
+  b.hidden = false;
+  b.innerHTML = 'テスト版：まだ公開していません。オレンジの「要確認」は公開前に確定してください。';
+}
+</script>
+</body>
+</html>
