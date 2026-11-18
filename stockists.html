@@ -503,7 +503,7 @@ const groupLabel = g => (GROUP_LABEL[g] && GROUP_LABEL[g][LANG]) || g;
 const RING_LABEL = {
   '槍穂': { en: 'Yariho' }, 'kasane 槍穂': { en: 'kasane Yariho' }, '八ヶ岳': { en: 'Yatsugatake' }, 'kasane 八ヶ岳': { en: 'kasane Yatsugatake' },
   '白馬': { en: 'Hakuba' }, 'kasane 白馬': { en: 'kasane Hakuba' }, '尾瀬': { en: 'Oze' }, '丹沢': { en: 'Tanzawa' },
-  '星生山': { en: 'Hosshozan' }, '星生山（細）': { en: 'Hosshozan (thin)', zh: '星生山（細版）' }, '阿蘇五岳': { en: 'Aso Gogaku' },
+  '星生山': { en: 'Hosshosan' }, '星生山（細）': { en: 'Hosshosan (thin)', zh: '星生山（細版）' }, '阿蘇五岳': { en: 'Aso Gogaku' },
   '裏銀': { en: 'Uragin' }, '鷲羽': { en: 'Washiba' }, '乗鞍': { en: 'Norikura', zh: '乘鞍' }, '有明山': { en: 'Ariake' },
   '表銀座': { en: 'Omote-Ginza' }, 'kasane 表銀座': { en: 'kasane Omote-Ginza' },
   'BLACK BRICK 別注': { en: 'BLACK BRICK special edition', zh: 'BLACK BRICK 特別款' },
@@ -753,7 +753,12 @@ function renderOverseas() {
 /* ── init ── */
 renderOverseas();
 renderEvents();
-applyRing(null);
+/* 開いたときに、写真があって実店舗でも扱っているリングを1つランダムに選んでおく */
+(() => {
+  fitTo(STORES);  /* 先に地図を描いてピンを用意してから選ぶ（でないとピンの薄表示が効かない） */
+  const pool = RING_GROUPS.flatMap(g => g.rings).filter(r => RING_MEDIA[r]?.photo && STORES.some(s => has(s.rings, r)));
+  applyRing(pool.length ? pool[Math.floor(Math.random() * pool.length)] : null);
+})();
 
 if (DRAFT) {
   const b = document.getElementById('draftBanner');
