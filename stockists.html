@@ -40,6 +40,15 @@
       color: #6a6860; text-decoration: none; font-weight: 200;
     }
     .back:hover { color: #c8c4bc; }
+    .hdr-right { display: flex; align-items: baseline; gap: 1.1rem; }
+    .lang { display: flex; gap: 0.15rem; }
+    .lang button {
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      font-size: 9px; letter-spacing: 0.12em; color: #5a5850; padding: 0.15rem 0.3rem;
+    }
+    .lang button:hover { color: #c8c4bc; }
+    .lang button.on { color: #f0ede8; border-bottom: 0.5px solid #a8a090; }
+    :lang(zh-Hant) body, body:lang(zh-Hant) { font-family: 'Jost', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif; }
 
     .draft-banner {
       margin: 1rem 2rem 0; padding: 0.7rem 1rem;
@@ -249,21 +258,24 @@
 
   <header class="header">
     <a href="./index.html" class="brand">puna<span class="dot">.</span>moon</a>
-    <a href="./index.html" class="back">← Index</a>
+    <div class="hdr-right">
+      <div class="lang" id="langSwitch" aria-label="Language"></div>
+      <a href="./index.html" class="back">← Index</a>
+    </div>
   </header>
 
   <div class="draft-banner" id="draftBanner" hidden></div>
 
   <section class="intro">
     <div class="title">Stockists</div>
-    <div class="title-sub">取り扱い店舗</div>
-    <p class="lead">地図のピンをタップすると、店舗の情報と取り扱いリングが表示されます。リングから取り扱い店舗を探すこともできます。</p>
+    <div class="title-sub" data-i18n="subtitle">取り扱い店舗</div>
+    <p class="lead" data-i18n="lead">地図のピンをタップすると、店舗の情報と取り扱いリングが表示されます。リングから取り扱い店舗を探すこともできます。</p>
   </section>
 
   <section class="filter" aria-label="リングから探す">
     <div class="filter-head">
       <span class="filter-label">Find by ring</span>
-      <button class="filter-clear" id="filterClear" hidden>× 解除</button>
+      <button class="filter-clear" id="filterClear" data-i18n="clear" hidden>× 解除</button>
     </div>
     <div id="chips"></div>
     <div class="result" id="result" aria-live="polite" hidden></div>
@@ -275,25 +287,26 @@
   </div>
 
   <div class="card" id="card" aria-live="polite">
-    <div class="card-empty">店舗を選んでください</div>
+    <div class="card-empty" data-i18n="pickStore">店舗を選んでください</div>
   </div>
 
   <section class="section">
     <div class="section-label">Store list</div>
-    <div class="section-title">店舗一覧</div>
+    <div class="section-title" data-i18n="storeList">店舗一覧</div>
     <div id="storeList"></div>
   </section>
 
   <section class="section">
     <div class="section-label">Online</div>
-    <div class="section-title">オンラインのお取り扱い</div>
+    <div class="section-title" data-i18n="online">オンラインのお取り扱い</div>
     <div id="onlineList"></div>
+    <div id="overseas"></div>
   </section>
 
   <section class="section">
     <div class="section-label">Event / Pop-up</div>
-    <div class="section-title">イベント出店・POPUP</div>
-    <p class="section-note">イベント・POPUPでは、全てのアイテムをご覧いただけます。</p>
+    <div class="section-title" data-i18n="events">イベント出店・POPUP</div>
+    <p class="section-note" data-i18n="eventsNote">イベント・POPUPでは、全てのアイテムをご覧いただけます。</p>
     <div id="eventList"></div>
   </section>
 
@@ -324,6 +337,9 @@ const STORES = [
   { id: 'yamatabi', name: '山旅ショップ', sub: '山と旅の道具「山旅」直営店', area: '東京',
     address: '東京都江東区白河1-3-13 清洲寮 ハ-11号（210）', instagram: 'yamatabitabi',
     note: '営業：金・土・日 13:00〜18:00（歴史ある建物のため、靴を脱いでお上がりください）',
+    note_en: 'Open Fri–Sun 13:00–18:00 (a historic building — please take off your shoes).',
+    note_zh: '營業時間：週五～週日 13:00–18:00（歷史建築，請脫鞋入內）',
+    sub_en: 'Official shop of “Yamatabi”', sub_zh: '「山旅」直營店',
     lat: 35.68201, lng: 139.79994,
     rings: [{ name: '表銀座', only: true }, { name: 'kasane 表銀座', only: true }] },
   { id: 'hachioji', name: '八王子登山用品店', area: '東京',
@@ -353,7 +369,7 @@ const STORES = [
     rings: [{ name: '白馬' }, { name: 'kasane 白馬' }] },
   { id: 'kurumu', name: 'CAFÉ & GALLERY KURUMu', area: '長野',
     address: '長野県松本市安曇4307-1（乗鞍高原・一の瀬）', instagram: 'kurumu_norikura',
-    note: '冬季休業あり',
+    note: '冬季休業あり', note_en: 'Closed in winter', note_zh: '冬季公休',
     lat: 36.11136, lng: 137.62664,
     rings: [{ name: '乗鞍', only: true }] },
 
@@ -422,6 +438,89 @@ const RING_MEDIA = {
 const AREA_ORDER = ['東京', '山梨', '長野', '福岡'];
 /* ========================================================= */
 
+/* ========================================================= 
+   多言語（日本語・English・繁體中文）
+   - 初回は端末の言語で自動選択（zh→繁體中文、ja→日本語、それ以外→English）。選んだ言語は保存
+   - URLに ?lang=en / ?lang=zh / ?lang=ja を付けると、その言語で開く
+   ========================================================= */
+const LANGS = { ja: '日本語', en: 'EN', zh: '繁中' };
+const HTML_LANG = { ja: 'ja', en: 'en', zh: 'zh-Hant' };
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q && LANGS[q]) { try { localStorage.setItem('punamoon.lang', q); } catch {} return q; }
+  try { const v = localStorage.getItem('punamoon.lang'); if (v && LANGS[v]) return v; } catch {}
+  const nav = (navigator.languages || [navigator.language || 'ja']).map(x => x.toLowerCase());
+  for (const l of nav) { if (l.startsWith('ja')) return 'ja'; if (l.startsWith('zh')) return 'zh'; if (l.startsWith('en')) return 'en'; }
+  return 'en';
+})();
+document.documentElement.lang = HTML_LANG[LANG];
+
+const I18N = {
+  subtitle:   { ja: '取り扱い店舗', en: 'Where to find us', zh: '販售據點' },
+  lead:       { ja: '地図のピンをタップすると、店舗の情報と取り扱いリングが表示されます。リングから取り扱い店舗を探すこともできます。',
+                en: 'Tap a pin on the map to see the shop and the rings it carries. You can also search for shops by ring.',
+                zh: '點選地圖上的標記，即可查看店鋪資訊與販售的戒指款式。也可以從戒指款式尋找販售店鋪。' },
+  clear:      { ja: '× 解除', en: '× Clear', zh: '× 清除' },
+  pickStore:  { ja: '店舗を選んでください', en: 'Select a shop', zh: '請選擇店鋪' },
+  storeList:  { ja: '店舗一覧', en: 'Shops', zh: '店鋪列表' },
+  online:     { ja: 'オンラインのお取り扱い', en: 'Online', zh: '線上購買' },
+  events:     { ja: 'イベント出店・POPUP', en: 'Events & Pop-ups', zh: '活動擺攤・快閃店' },
+  eventsNote: { ja: 'イベント・POPUPでは、全てのアイテムをご覧いただけます。', en: 'At events and pop-ups, we bring every item.', zh: '活動與快閃店會展出全系列商品。' },
+  eventsText: { ja: '出店予定はInstagramでお知らせしています。最新の情報はInstagramをご覧ください。',
+                en: 'Upcoming events are announced on Instagram. Please check Instagram for the latest information.',
+                zh: '擺攤資訊會在 Instagram 公告，最新消息請見 Instagram。' },
+  allItems:   { ja: '全てのアイテム', en: 'All items', zh: '全系列商品' },
+  onlineStore:{ ja: 'オンラインストアでのお取り扱い', en: 'Available at their online store', zh: '於線上商店販售' },
+  baseNote:   { ja: '約2ヶ月に1回のペースで不定期オープンしています。オープン時期はInstagramでお知らせします。',
+                en: 'The shop opens irregularly, about once every two months. Opening dates are announced on Instagram.',
+                zh: '約每 2 個月不定期開放一次，開放時間會在 Instagram 公告。' },
+  alsoLabel:  { ja: '併記', en: 'Also', zh: '相關據點' },
+  listEmpty:  { ja: 'このリングを扱う実店舗はありません。オンライン・イベントをご覧ください。',
+                en: 'No shop carries this ring right now. Please see Online or Events.',
+                zh: '目前沒有實體店鋪販售此款，請參考線上購買或活動資訊。' },
+  countStores:{ ja: n => `${n} 店舗`, en: n => `${n} ${n === 1 ? 'shop' : 'shops'}`, zh: n => `${n} 間` },
+  whereTitle: { ja: r => `${r} を扱っている場所`, en: r => `Where to find ${r}`, zh: r => `${r} 的販售據點` },
+  shopsLine:  { ja: '店舗：', en: 'Shops: ', zh: '店鋪：' },
+  onlineLine: { ja: 'オンライン：', en: 'Online: ', zh: '線上：' },
+  none:       { ja: 'なし', en: 'none', zh: '無' },
+  sep:        { ja: '、', en: ', ', zh: '、' },
+  eventsLine: { ja: 'イベント・POPUP', en: 'Events & pop-ups', zh: '活動・快閃店' },
+  seeIg:      { ja: 'Instagramで見る →', en: 'View on Instagram →', zh: '在 Instagram 查看 →' },
+  seeBase:    { ja: 'BASEで見る →', en: 'View on BASE →', zh: '在 BASE 查看 →' },
+  overseasTitle: { ja: '海外からのご注文', en: 'Ordering from overseas', zh: '海外訂購' },
+  overseasText:  { ja: '海外発送は、BASEでのご注文、またはInstagramのDM・メールでご相談ください。',
+                   en: 'We ship overseas. Order on BASE, or contact us by Instagram DM or e-mail.',
+                   zh: '提供海外寄送。請於 BASE 下單，或透過 Instagram 私訊、電子郵件與我們聯繫。' },
+};
+const t = (k, ...a) => { const v = I18N[k][LANG] ?? I18N[k].ja; return typeof v === 'function' ? v(...a) : v; };
+const loc = (o, f) => o[`${f}_${LANG}`] ?? o[f];
+
+const AREA_LABEL = { '東京': { en: 'Tokyo' }, '山梨': { en: 'Yamanashi' }, '長野': { en: 'Nagano' }, '福岡': { en: 'Fukuoka' } };
+const areaLabel = a => (AREA_LABEL[a] && AREA_LABEL[a][LANG]) || a;
+const GROUP_LABEL = { '等高線シグネットリング': { en: 'Contour signet ring', zh: '等高線印戒' }, '稜線リング': { en: 'Ridgeline rings', zh: '稜線戒指' },
+  'Brocken': {}, 'アクセサリー': { en: 'Accessories', zh: '飾品' } };
+const groupLabel = g => (GROUP_LABEL[g] && GROUP_LABEL[g][LANG]) || g;
+const RING_LABEL = {
+  '槍穂': { en: 'Yariho' }, 'kasane 槍穂': { en: 'kasane Yariho' }, '八ヶ岳': { en: 'Yatsugatake' }, 'kasane 八ヶ岳': { en: 'kasane Yatsugatake' },
+  '白馬': { en: 'Hakuba' }, 'kasane 白馬': { en: 'kasane Hakuba' }, '尾瀬': { en: 'Oze' }, '丹沢': { en: 'Tanzawa' },
+  '星生山': { en: 'Hosshozan' }, '星生山（細）': { en: 'Hosshozan (thin)', zh: '星生山（細版）' }, '阿蘇五岳': { en: 'Aso Gogaku' },
+  '裏銀': { en: 'Uragin' }, '鷲羽': { en: 'Washiba' }, '乗鞍': { en: 'Norikura', zh: '乘鞍' }, '有明山': { en: 'Ariake' },
+  '表銀座': { en: 'Omote-Ginza' }, 'kasane 表銀座': { en: 'kasane Omote-Ginza' },
+  'BLACK BRICK 別注': { en: 'BLACK BRICK special edition', zh: 'BLACK BRICK 特別款' },
+  'イヤカフ': { en: 'Ear cuff', zh: '耳骨夾' }, 'ピアス': { en: 'Earrings', zh: '耳環' }, '手ぬぐいどめ': { en: 'Tenugui clip', zh: '手巾扣' },
+};
+const ringLabel = r => (RING_LABEL[r] && RING_LABEL[r][LANG]) || r;
+
+/* 静的な文言と言語切り替え */
+document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+document.getElementById('langSwitch').innerHTML = Object.entries(LANGS).map(([k, v]) =>
+  `<button type="button" data-lang="${k}" class="${k === LANG ? 'on' : ''}" lang="${HTML_LANG[k]}">${v}</button>`).join('');
+document.getElementById('langSwitch').addEventListener('click', e => {
+  const b = e.target.closest('button[data-lang]'); if (!b || b.dataset.lang === LANG) return;
+  try { localStorage.setItem('punamoon.lang', b.dataset.lang); } catch {}
+  const u = new URL(location.href); u.searchParams.delete('lang'); location.href = u.toString();
+});
+
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const igHandle = s => s.replace(/^@/, '').trim();
 const tbd = label => DRAFT ? `<span class="tbd">${label}</span>` : '';
@@ -432,7 +531,7 @@ let activeId = null;
 function tagsHtml(rings) {
   if (!rings.length) return DRAFT ? tbd('取り扱いリング要確認') : '';
   return '<div class="tags">' + rings.map(r =>
-    `<span class="tag${r.name === activeRing ? ' hit' : ''}">${esc(r.name)}</span>`
+    `<span class="tag${r.name === activeRing ? ' hit' : ''}">${esc(ringLabel(r.name))}</span>`
   ).join('') + '</div>';
 }
 const igLink = h => `<a href="https://www.instagram.com/${encodeURIComponent(igHandle(h))}/" target="_blank" rel="noopener">@${esc(igHandle(h))}</a>`;
@@ -446,19 +545,19 @@ function renderCard(s) {
   const addr = (s.address ? mapLink(s.address) : tbd('住所要確認')) + (s.addressCheck && DRAFT ? `<br>${tbd('住所の表記ゆれあり・要確認')}` : '');
   const also = s.also ? `
       <div class="card-also">
-        <div class="card-label" style="width:auto;margin-bottom:0.3rem;">併記</div>
+        <div class="card-label" style="width:auto;margin-bottom:0.3rem;">${esc(t('alsoLabel'))}</div>
         <div class="card-also-name">${esc(s.also.name)}</div>
         ${row('Address', s.also.address ? mapLink(s.also.address) : '')}
         ${row('Instagram', s.also.instagram ? igLink(s.also.instagram) : '')}
       </div>` : '';
   document.getElementById('card').innerHTML = `
     <div class="card-fade">
-      <div class="card-area">${esc(s.area)}</div>
+      <div class="card-area">${esc(areaLabel(s.area))}</div>
       <div class="card-name">${esc(s.name)}</div>
-      ${s.sub ? `<div class="card-sub">${esc(s.sub)}</div>` : ''}
+      ${loc(s, 'sub') ? `<div class="card-sub">${esc(loc(s, 'sub'))}</div>` : ''}
       ${row('Address', addr)}
       ${row('Instagram', s.instagram ? igLink(s.instagram) : tbd('アカウント要確認'))}
-      ${row('Info', s.note ? `<span class="muted">${esc(s.note)}</span>` : '')}
+      ${row('Info', loc(s, 'note') ? `<span class="muted">${esc(loc(s, 'note'))}</span>` : '')}
       ${row('Rings', tagsHtml(s.rings))}
       ${also}
     </div>`;
@@ -523,12 +622,12 @@ listEl.innerHTML = areas.map(a => {
   const list = STORES.filter(s => s.area === a);
   return `
   <details class="area" data-area="${esc(a)}" open>
-    <summary><span>${esc(a)}<span class="area-caret">›</span></span><span class="area-count" data-count></span></summary>
+    <summary><span>${esc(areaLabel(a))}<span class="area-caret">›</span></span><span class="area-count" data-count></span></summary>
     <div class="area-body">
-      ${list.map(s => `<button class="store-btn" data-id="${s.id}"><span>${esc(s.name)}${s.sub ? `<small>${esc(s.sub)}</small>` : ''}</span><span class="arrow">●</span></button>`).join('')}
+      ${list.map(s => `<button class="store-btn" data-id="${s.id}"><span>${esc(s.name)}${loc(s, 'sub') ? `<small>${esc(loc(s, 'sub'))}</small>` : ''}</span><span class="arrow">●</span></button>`).join('')}
     </div>
   </details>`;
-}).join('') + '<div class="list-empty" id="listEmpty" hidden>このリングを扱う実店舗はありません。オンライン・イベントをご覧ください。</div>';
+}).join('') + `<div class="list-empty" id="listEmpty" hidden>${esc(t('listEmpty'))}</div>`;
 listEl.addEventListener('click', e => {
   const b = e.target.closest('.store-btn');
   if (!b) return;
@@ -542,7 +641,7 @@ function renderOnline() {
     ONLINE.map(o => `
       <div class="box${activeRing && !has(o.rings, activeRing) ? ' dim' : ''}">
         <div class="box-name">${esc(o.name)}</div>
-        <div class="box-meta">オンラインストアでのお取り扱い</div>
+        <div class="box-meta">${esc(t('onlineStore'))}</div>
         ${tagsHtml(o.rings)}
         <div class="box-links">
           ${o.url ? `<a class="box-link" href="${esc(o.url)}" target="_blank" rel="noopener"><span>Store</span><span>→</span></a>` : (DRAFT ? `<div class="box-meta">${tbd('URL要確認')}</div>` : '')}
@@ -551,7 +650,7 @@ function renderOnline() {
       </div>`).join('') + `
       <div class="box${activeRing && !has(BASE.rings, activeRing) ? ' dim' : ''}">
         <div class="box-name">${esc(BASE.name)}</div>
-        <div class="box-meta">${esc(BASE.note)}</div>
+        <div class="box-meta">${esc(t('baseNote'))}</div>
         ${tagsHtml(BASE.rings)}
         <a class="box-link" href="${esc(BASE.url)}" target="_blank" rel="noopener"><span>Online Shop</span><span>→</span></a>
       </div>`;
@@ -561,8 +660,8 @@ function renderOnline() {
 function renderEvents() {
   document.getElementById('eventList').innerHTML = `
     <div class="box">
-      <div class="box-meta" style="margin-top:0">出店予定はInstagramでお知らせしています。最新の情報はInstagramをご覧ください。</div>
-      <div class="tags" style="margin-top:0.9rem;"><span class="tag only">全てのアイテム</span></div>
+      <div class="box-meta" style="margin-top:0">${esc(t('eventsText'))}</div>
+      <div class="tags" style="margin-top:0.9rem;"><span class="tag only">${esc(t('allItems'))}</span></div>
       <a class="box-link" href="https://www.instagram.com/${encodeURIComponent(EVENT_INFO.instagram)}/" target="_blank" rel="noopener"><span>@${esc(EVENT_INFO.instagram)}</span><span>→</span></a>
     </div>`;
 }
@@ -571,8 +670,8 @@ function renderEvents() {
 const chipsEl = document.getElementById('chips');
 chipsEl.innerHTML = RING_GROUPS.map(g => `
   <div class="chip-group">
-    <div class="chip-group-name">${esc(g.name)}</div>
-    <div class="chips">${g.rings.map(r => `<button class="chip" data-ring="${esc(r)}">${esc(r)}</button>`).join('')}</div>
+    <div class="chip-group-name">${esc(groupLabel(g.name))}</div>
+    <div class="chips">${g.rings.map(r => `<button class="chip" data-ring="${esc(r)}">${esc(ringLabel(r))}</button>`).join('')}</div>
   </div>`).join('');
 chipsEl.addEventListener('click', e => {
   const c = e.target.closest('.chip');
@@ -595,7 +694,7 @@ function applyRing(ring) {
   document.querySelectorAll('.area').forEach(a => {
     const n = STORES.filter(s => s.area === a.dataset.area && visIds.has(s.id)).length;
     a.hidden = n === 0;
-    a.querySelector('[data-count]').textContent = `${n} 店舗`;
+    a.querySelector('[data-count]').textContent = t('countStores', n);
   });
   document.getElementById('listEmpty').hidden = vis.length > 0;
 
@@ -603,19 +702,21 @@ function applyRing(ring) {
   if (ring) {
     const online = [...ONLINE.filter(o => has(o.rings, ring)).map(o => o.name), ...(has(BASE.rings, ring) ? ['BASE'] : [])];
     const media = RING_MEDIA[ring] || {};
-    const mediaHtml = media.photo ? `<img class="ring-photo" src="${esc(media.photo)}" alt="${esc(ring)}" loading="lazy">` : '';
-    res.innerHTML = `${mediaHtml}<strong>${esc(ring)}</strong> を扱っている場所<br>
-      店舗：${vis.length ? vis.map(s => esc(s.name)).join('、') : 'なし'}<br>
-      ${online.length ? `オンライン：${online.map(esc).join('、')}<br>` : ''}
-      イベント・POPUP
+    const label = ringLabel(ring);
+    const mediaHtml = media.photo ? `<img class="ring-photo" src="${esc(media.photo)}" alt="${esc(label)}" loading="lazy">` : '';
+    const strong = `<strong>${esc(label)}</strong>`;
+    res.innerHTML = `${mediaHtml}${t('whereTitle', strong)}<br>
+      ${esc(t('shopsLine'))}${vis.length ? vis.map(s => esc(s.name)).join(esc(t('sep'))) : esc(t('none'))}<br>
+      ${online.length ? `${esc(t('onlineLine'))}${online.map(esc).join(esc(t('sep')))}<br>` : ''}
+      ${esc(t('eventsLine'))}
       ${media.ig || media.base ? `<div class="ring-links">
-        ${media.ig ? `<a href="${esc(media.ig)}" target="_blank" rel="noopener">Instagramで見る →</a>` : ''}
-        ${media.base ? `<a href="${esc(media.base)}" target="_blank" rel="noopener">BASEで見る →</a>` : ''}
+        ${media.ig ? `<a href="${esc(media.ig)}" target="_blank" rel="noopener">${esc(t('seeIg'))}</a>` : ''}
+        ${media.base ? `<a href="${esc(media.base)}" target="_blank" rel="noopener">${esc(t('seeBase'))}</a>` : ''}
       </div>` : ''}`;
     res.hidden = false;
     if (activeId && !visIds.has(activeId)) {
       activeId = null;
-      document.getElementById('card').innerHTML = '<div class="card-empty">店舗を選んでください</div>';
+      document.getElementById('card').innerHTML = `<div class="card-empty">${esc(t('pickStore'))}</div>`;
     }
     fitTo(vis.length ? vis : STORES);
   } else {
@@ -633,7 +734,24 @@ document.addEventListener('click', e => {
   applyRing(null);
 });
 
+/* ── 海外からのご注文（English・繁體中文のときだけ） ── */
+function renderOverseas() {
+  const el = document.getElementById('overseas');
+  if (LANG === 'ja') { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="box" style="margin-top:0.6rem;">
+      <div class="box-name">${esc(t('overseasTitle'))}</div>
+      <div class="box-meta">${esc(t('overseasText'))}</div>
+      <div class="box-links">
+        <a class="box-link" href="${esc(BASE.url)}" target="_blank" rel="noopener"><span>BASE</span><span>→</span></a>
+        <a class="box-link" href="https://ig.me/m/puna.moon" target="_blank" rel="noopener"><span>Instagram DM</span><span>→</span></a>
+        <a class="box-link" href="mailto:puna.moon.craft@gmail.com"><span>E-mail</span><span>→</span></a>
+      </div>
+    </div>`;
+}
+
 /* ── init ── */
+renderOverseas();
 renderEvents();
 applyRing(null);
 

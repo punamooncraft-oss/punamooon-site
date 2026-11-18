@@ -126,6 +126,24 @@
       text-transform: none;
     }
 
+    .lang {
+      position: absolute; top: 1rem; right: 1rem; z-index: 5;
+      display: flex; gap: 0.15rem;
+      background: rgba(14,14,12,0.45); padding: 0.25rem 0.35rem;
+    }
+    .lang button {
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      font-size: 9px; letter-spacing: 0.12em; color: #8a8680; padding: 0.15rem 0.3rem;
+    }
+    .lang button:hover { color: #f0ede8; }
+    .lang button.on { color: #f0ede8; border-bottom: 0.5px solid #a8a090; }
+    .intl-note {
+      margin-top: 0.6rem; font-size: 10px; line-height: 1.9; letter-spacing: 0.08em;
+      color: #8a8680; font-weight: 300;
+    }
+    .intl-note[hidden] { display: none; }
+    body:lang(zh-Hant) { font-family: 'Jost', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif; }
+
     .link-arrow {
       font-size: 12px;
       color: #3a3830;
@@ -165,6 +183,7 @@
   <div class="hero">
     <img src="kasane_main_01.JPG" alt="puna.moon — 山の稜線リング">
     <div class="hero-overlay"></div>
+    <div class="lang" id="langSwitch" aria-label="Language"></div>
   </div>
 
   <div class="content">
@@ -185,7 +204,7 @@
         <span class="link-arrow">→</span>
       </a>
       <a class="link-btn" href="./puna.moon_catalog_compressed.pdf" target="_blank" rel="noopener">
-        <span>Online Catalog<span class="link-note">2026.6時点</span></span>
+        <span>Online Catalog<span class="link-note" data-i18n="catalogNote">2026.6時点</span></span>
         <span class="link-arrow">→</span>
       </a>
       <a class="link-btn" href="./stockists.html">
@@ -196,10 +215,43 @@
         <span>E-mail</span>
         <span class="link-arrow">→</span>
       </a>
+      <p class="intl-note" id="intlNote" hidden></p>
     </div>
 
     <div class="footer fade-in">© puna.moon</div>
   </div>
 
+<script>
+/* 多言語（日本語・English・繁體中文）。取扱店マップと同じ保存先（punamoon.lang）を使う */
+(() => {
+  const LANGS = { ja: '日本語', en: 'EN', zh: '繁中' };
+  const HTML_LANG = { ja: 'ja', en: 'en', zh: 'zh-Hant' };
+  const q = new URLSearchParams(location.search).get('lang');
+  let lang = null;
+  if (q && LANGS[q]) { lang = q; try { localStorage.setItem('punamoon.lang', q); } catch {} }
+  if (!lang) { try { const v = localStorage.getItem('punamoon.lang'); if (v && LANGS[v]) lang = v; } catch {} }
+  if (!lang) {
+    const nav = (navigator.languages || [navigator.language || 'ja']).map(x => x.toLowerCase());
+    lang = 'en';
+    for (const l of nav) { if (l.startsWith('ja')) { lang = 'ja'; break; } if (l.startsWith('zh')) { lang = 'zh'; break; } if (l.startsWith('en')) { lang = 'en'; break; } }
+  }
+  document.documentElement.lang = HTML_LANG[lang];
+  const T = {
+    catalogNote: { ja: '2026.6時点', en: 'Jun 2026 · Japanese', zh: '2026年6月版・日文' },
+    intlNote: { en: 'We ship overseas. Order on the Online Shop (BASE), or contact us by Instagram DM or e-mail.',
+                zh: '提供海外寄送。請於 Online Shop（BASE）下單，或透過 Instagram 私訊、電子郵件與我們聯繫。' },
+  };
+  document.querySelectorAll('[data-i18n]').forEach(el => { const v = T[el.dataset.i18n][lang]; if (v) el.textContent = v; });
+  const note = document.getElementById('intlNote');
+  if (T.intlNote[lang]) { note.textContent = T.intlNote[lang]; note.hidden = false; }
+  const sw = document.getElementById('langSwitch');
+  sw.innerHTML = Object.entries(LANGS).map(([k, v]) => `<button type="button" data-lang="${k}" class="${k === lang ? 'on' : ''}" lang="${HTML_LANG[k]}">${v}</button>`).join('');
+  sw.addEventListener('click', e => {
+    const b = e.target.closest('button[data-lang]'); if (!b || b.dataset.lang === lang) return;
+    try { localStorage.setItem('punamoon.lang', b.dataset.lang); } catch {}
+    const u = new URL(location.href); u.searchParams.delete('lang'); location.href = u.toString();
+  });
+})();
+</script>
 </body>
 </html>
